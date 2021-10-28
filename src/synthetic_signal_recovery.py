@@ -1,6 +1,5 @@
 import numpy
 
-# define function of ricker wavelet
 def ricker(f, length, dt):
       '''
     Description
