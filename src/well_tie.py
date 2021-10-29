@@ -1,5 +1,9 @@
+import json
+
 def read_inputs(jpath):
-    return None
+    with open(jpath) as file:
+        paths = json.load(file)
+    return paths
 
 def read_data(ui):
     return None
