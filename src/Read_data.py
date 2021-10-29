@@ -18,6 +18,9 @@ def read_las(path):
 
 def read_segysak(path):
   
- get_segy_texthead(segy_file) 
+ get_segy_texthead(segy_file)
+
+  Description
+  Read Siesmic
 
   return None
