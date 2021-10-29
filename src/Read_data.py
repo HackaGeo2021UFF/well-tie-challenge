@@ -19,5 +19,5 @@ def read_segysak(path):
     Description
       Read Siesmic
   '''
-  gst=get_segy_texthead(path)
+  gst = get_segy_texthead(path)
   return gst
