@@ -11,9 +11,13 @@ def read_data(ui):
     Description
         
     Arguments
-        path: string
+        ui: dict with string
     Returns
-        well: welly.well.Well
+        data: dict
+        Description
+            Well: welly.well.Well
+            Tops: dataframe
+            Seismic: dataframe
     '''
     
     # read well .las
