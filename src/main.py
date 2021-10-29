@@ -10,8 +10,8 @@ Arguments
       the json file with its inputs
 '''
 
-import welly
-import las
+import sys
+from well_tie import *
 
 # user inputs `ui` passed as a json file
 ui = read_inputs(sys.argv[1])
