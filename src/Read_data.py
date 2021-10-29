@@ -1,4 +1,7 @@
+!pip install segysak
+
 from welly import Well
+from segysak.segy import segy_loader
 
 def read_las(path):
   '''
@@ -11,7 +14,10 @@ def read_las(path):
   '''
   well = Well.from_las(path)
   return well
+ 
 
-def read_seg(path):
-  # in progress
+def read_segysak(path):
+  
+ get_segy_texthead(segy_file) 
+
   return None
