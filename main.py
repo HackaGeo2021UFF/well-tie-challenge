@@ -19,8 +19,19 @@ w = rd.read_las(w_path)
 #
 wf.despike_smoothing(w)
 
+# Depth of logging starts(m) from header
+log_start = 1517.0   
+# Kelly Bushing elevation(m) from header
+kb = 15 
+# define the gap velocity
+repl_vel = 2632                # this is from VSP data knowledge (m/s)
+
+wf.twowaytime(log_start,kb,repl_vel,w)
+
 df = w.df()
 
 wf.acoustic_imp(df)
 
 wf.reflection_coefficient(df)
+
+wf.reflectivitycoeficienttimedomain(wf.acusticimpedancetimedomain(df))
