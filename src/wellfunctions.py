@@ -1,35 +1,34 @@
-'''Resampling to the time domain'''
-''' Reflectivity series should be transferred into time domain for convolution. After defining the time vector, we can use the interpolation function from the numpy library'''
-
-'''# download the data
-import git
-git.Git("/content").clone("https://github.com/mardani72/Synthetic_Seismogram.git")'''
-
-###################################
-# NEED AS IMPUT df.TWT and df.AI
-###################################
-
-import welly
+from typing import Type
 from welly import Well
 import pandas as pd
 import lasio
 import numpy as np
-#import Read_data as Rd
-#import 'funçõesandersonAI'
+import matplotlib.pyplot as plt
 
-w_path = 'Synthetic_Seismogram/KK1.las'
-w = Well.from_las(w_path)
+# conversar sobre of inputs inicias e o type dos vetores
+# UNIT CONVERSION
+def conversion(w):
+    w.data['DT'] = w.data['DT'] / 0.3048    # µs/ft to µs/m
+    w.data['RHOB'] = w.data['RHOB'] * 1000  # unit convert to kg/m3
 
-# runing with welly lib we are not able to see las header data
-#print(w.header)
+def despike_smoothing(w):
+    w.data['DT_DS'] = w.data['DT'].despike(window_length=50, z=2)
+    w.data['RHOB_DS'] = w.data['RHOB'].despike(window_length=50, z=2)
 
-w_las= lasio.read(w_path) # lasio lib will help
-#print(w_las.header)
-w
+    w.data['DT_DS_SM'] = w.data['DT_DS'].smooth(
+        window_length=10, samples=False)
+    w.data['RHOB_DS_SM'] = w.data['RHOB_DS'].smooth(
+        window_length=10, samples=False)
+
 def twowaytime(log_start,kb,repl_vel,w):
-       
+    # Depth of logging starts(m) from header
+    log_start = 1517.0          
+
+    # Kelly Bushing elevation(m) from header
+    kb = 15 
     # define the gap interval in m
     gap_int = log_start - kb
+
 
     # calculate the TWT for the gap
     log_start_time =  2 * gap_int / repl_vel # 2 for twt
@@ -43,6 +42,17 @@ def twowaytime(log_start,kb,repl_vel,w):
     # and now TWT for the whole depth range
     w.data['TWT'] = t_cum + log_start_time # por que mesmo que fazemos esta soma???????
     w.data['TWT'].values
+
+
+def acoustic_imp(df):
+    df['Vsonic'] = 1e6 / df['DT_DS_SM']
+    df['AI'] = df['Vsonic'].values * df['RHOB_DS_SM'].values
+
+def reflection_coefficient(df):
+    ac_imp = df['AI'].values
+    ref_coef = (ac_imp[1:] - ac_imp[:-1]) / (ac_imp[1:] + ac_imp[:-1])
+    ref_coef = np.append(ref_coef, ref_coef[-1])
+    df['REF_COEF'] = ref_coef
 
 def acusticimpedancetimedomain(df):
     # define a sampling interval dt in s
@@ -60,14 +70,12 @@ def acusticimpedancetimedomain(df):
                         fp = df.AI)
     return AI_tdom 
 
-#AI_tdom = acusticimpedancetimedomain(TWT,AI)
-
-def Reflectivitycoeficienttimedomain(AI_tdom):
+def reflectivitycoeficienttimedomain(AI_tdom):
     # again Rc calulation but in resampled time domain
     Rc_tdom = []
     for i in range(len(AI_tdom) - 1):
         z = (AI_tdom[i+1] - AI_tdom[i]) / (AI_tdom[i+1] + AI_tdom[i])
-    Rc_tdom.append(z)
+        Rc_tdom.append(z)
         
     # to adjust vector size copy the last element to the tail
     Rc_tdom.append(Rc_tdom[-1])
