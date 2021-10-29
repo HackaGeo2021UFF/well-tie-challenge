@@ -1,5 +1,5 @@
 from welly import Well
-from segysak.segy import segy_loader
+from segysak.segy import segy_loader, segy_header_scan, segy_header_scrape, get_segy_texthead
 
 def read_las(path):
   '''
