@@ -1,6 +1,9 @@
 import json
+import welly
 from welly import Well
 import pandas as pd
+import lasio
+import numpy as np
 
 def read_inputs(jpath):
     with open(jpath) as file:
