@@ -84,6 +84,14 @@ def ia(data):
     return data
 
 def rc_time(data):
+    Imp = data['well']['AI'].values
+    Rc=[]
+    for i in range(len(Imp)-1):
+        Rc.append((Imp[i+1]-Imp[i])/(Imp[i]+Imp[i+1]))
+    # to adjust vector size copy the last element to the tail
+    Rc.append(Rc[-1])
+    # Let's add Rc into dataframe as new column
+    data['well']['Rc'] = pd.Series(Rc, index=df.index)
     return data
 
 def wvlt_conv(data):
