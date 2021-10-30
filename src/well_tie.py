@@ -72,7 +72,8 @@ def time_depth_relationship(data, ):
     #first replace NaN values with zero
     dt_iterval = np.nan_to_num(dt) * 0.1524 / 1e6
     t_cum =  np.cumsum(dt_iterval) * 2
-    w.data['TWT'] = t_cum + log_start_time
+    data['well']['TWT'] = t_cum + log_start_time
+    data['well'] = data['well'].df()
     return data
 
 def rc_time(data):
