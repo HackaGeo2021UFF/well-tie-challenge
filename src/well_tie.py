@@ -97,10 +97,10 @@ def rc_time(data):
     # Let's add Rc into dataframe as new column
     data['well']['Rc'] = pd.Series(Rc, index=data['well'].index)
 
-    dt = 0.001   #sampleing interval
-    t_max = 3.0   # max time to create time vector
-    t = np.arange(0, t_max, dt)
-    AI_tdom = np.interp(x=t, xp = df.TWT, fp = df.AI)    #resampling
+    dt = 0.004   #sampleing interval
+    t_max = 5.5   # max time to create time vector
+    t = np.arange(0, t_max+dt, dt)
+    AI_tdom = np.interp(x=t, xp = data['well'].TWT, fp = data['well'].AI)    #resampling
 
     # again Rc calulation but in reampled time domain
     Rc_tdom = []
@@ -108,7 +108,7 @@ def rc_time(data):
         Rc_tdom.append((AI_tdom[i+1]-AI_tdom[i])/(AI_tdom[i]+AI_tdom[i+1]))
     # to adjust vector size copy the last element to the tail
     Rc_tdom.append(Rc_tdom[-1])
-    data['well']['Rc_tdom'] = pd.Series(Rc_tdom, index=df.index)
+    data['Rc_tdom'] = Rc_tdom # pd.Series(Rc_tdom, index= data['well'].index)
 
     return data
 
@@ -125,7 +125,7 @@ def wvlt_conv(data):
     dt=0.001        # Sampling prefer to use smiliar to resampled AI
     
     t0, w = ricker (f, length, dt) # ricker wavelet 
-    synthetic = np.convolve(w, Rc_tdom, mode='same')
+    synthetic = np.convolve(w, data['Rc_tdom'], mode='same')
 
     data['synthetic seismogram'] = synthetic
     return data
