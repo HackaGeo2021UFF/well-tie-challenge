@@ -40,5 +40,3 @@ score = evaluate_results(data)
 
 # export data to Decision Workspace
 export_data(data)
-
-print(data)

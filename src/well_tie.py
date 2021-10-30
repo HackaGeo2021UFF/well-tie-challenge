@@ -62,7 +62,7 @@ def pre_processing_data(data):
 
 def time_depth_relationship(data, ):
     ### just an exemple
-    ### TO DO: become it inteligence
+    ### TO DO: become smart
     log_start = 1517               # Depth of logging starts(m) from header
     kb = 15                        # Kelly Bushing elevation(m) from header
     gap_int = log_start - kb
@@ -108,11 +108,27 @@ def rc_time(data):
 
     return data
 
+# define function of ricker wavelet
+def ricker(f, length, dt):
+    t0 = np.arange(-length/2, (length-dt)/2, dt)
+    y = (1.0 - 2.0*(np.pi**2)*(f**2)*(t0**2)) * np.exp(-(np.pi**2)*(f**2)*(t0**2))
+    return t0, y
+
 def wvlt_conv(data):
+    # TO DO: become smart
+    f=20            #wavelet frequency
+    length=0.512    #Wavelet vector length
+    dt=0.001        # Sampling prefer to use smiliar to resampled AI
+    
+    t0, w = ricker (f, length, dt) # ricker wavelet 
+    synthetic = np.convolve(w, Rc_tdom, mode='same')
+
+    data['synthetic seismogram'] = synthetic
     return data
 
 def evaluate_results(data):
-    return data
+    score = []
+    return score
 
 def export_data(data):
-    return data
+    return None
