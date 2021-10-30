@@ -25,6 +25,9 @@ data = pre_processing_data(data)
 # time-depth relationship `tdr` from DT
 data = time_depth_relationship(data)
 
+# acoustic impedance
+data = ai(data)
+
 # reflectivity coefficients `rc` profile (in time)
 data = rc_time(data)
 
@@ -37,3 +40,5 @@ score = evaluate_results(data)
 
 # export data to Decision Workspace
 export_data(data)
+
+print(data)

@@ -76,6 +76,13 @@ def time_depth_relationship(data, ):
     data['well'] = data['well'].df()
     return data
 
+def ia(data):
+    # Sonic velocity calculate
+    data['well']['Vsonic'] = 1e6/df.DT_DS_SM                    #(unit: m/s)
+    # AI calculate
+    data['well']['AI'] = data['well']['Vsonic'] * data['well']['RHOB_DS_SM']        #(unit: kg/m2.s)
+    return data
+
 def rc_time(data):
     return data
 
