@@ -1,6 +1,6 @@
 import json
-import welly
 from welly import Well
+import pandas as pd
 
 def read_inputs(jpath):
     with open(jpath) as file:
@@ -22,7 +22,7 @@ def read_data(ui):
     '''
     
     # read well .las
-    well = Well.from_las(ui['well_path'])       
+    well = Well.from_las(ui['well'])       
 
     # read from csv file into dataframe
     df_top = pd.read_csv(ui['tops'])            
@@ -39,7 +39,8 @@ def pre_processing_data(data):
     #unit convert to µs/m
     data['well']['DT'] = data['well']['DT'] / 0.3048  
     #unit convert to kg/m3  
-    data['well']['RHOB'] = data['well']['RHOB'] * 1000        
+    data['well']['RHOB'] = data['well']['RHOB'] * 1000
+
     #Despiking
     #Sonic Despiking
     dt = data['well']['DT']
@@ -60,6 +61,18 @@ def pre_processing_data(data):
     return data
 
 def time_depth_relationship(data, ):
+    ### just an exemple
+    ### TO DO: become it inteligence
+    log_start = 1517               # Depth of logging starts(m) from header
+    kb = 15                        # Kelly Bushing elevation(m) from header
+    gap_int = log_start - kb
+    repl_vel = 2632                # this is from VSP data knowledge (m/s)
+    log_start_time = 2.0 * gap_int / repl_vel        # 2 for twt
+
+    #first replace NaN values with zero
+    dt_iterval = np.nan_to_num(dt) * 0.1524 / 1e6
+    t_cum =  np.cumsum(dt_iterval) * 2
+    w.data['TWT'] = t_cum + log_start_time
     return data
 
 def rc_time(data):
