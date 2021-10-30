@@ -63,7 +63,7 @@ def pre_processing_data(data):
     data['well'].data['RHOB_DS_SM'] = den_ds.smooth(window_length=10, samples=False)
     return data
 
-def time_depth_relationship(data, ):
+def time_depth_relationship(data):
     ### just an exemple
     ### TO DO: become smart
     log_start = 1517               # Depth of logging starts(m) from header
@@ -77,7 +77,7 @@ def time_depth_relationship(data, ):
     dt_iterval = np.nan_to_num(dt) * 0.1524 / 1e6
     t_cum =  np.cumsum(dt_iterval) * 2
     data['well'].data['TWT'] = t_cum + log_start_time
-    data['well'].data = data['well'].df()
+    data['well'] = data['well'].df()
     return data
 
 def ai(data):
@@ -95,7 +95,7 @@ def rc_time(data):
     # to adjust vector size copy the last element to the tail
     Rc.append(Rc[-1])
     # Let's add Rc into dataframe as new column
-    data['well']['Rc'] = pd.Series(Rc, index=df.index)
+    data['well']['Rc'] = pd.Series(Rc, index=data['well'].index)
 
     dt = 0.001   #sampleing interval
     t_max = 3.0   # max time to create time vector
