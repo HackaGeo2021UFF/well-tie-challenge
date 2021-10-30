@@ -35,32 +35,32 @@ def read_data(ui):
     # read seismic arround well
     seismic_df = pd.read_csv(ui['seismic'])     
 
-    data = {'well':well.data,'tops':tops_dict,'seismic':seismic_df}
+    data = {'well':well,'tops':tops_dict,'seismic':seismic_df}
     return data
 
 def pre_processing_data(data):
     #unit convert to µs/m
-    data['well']['DT'] = data['well']['DT'] / 0.3048  
+    data['well'].data['DT'] = data['well'].data['DT'] / 0.3048  
     #unit convert to kg/m3  
-    data['well']['RHOB'] = data['well']['RHOB'] * 1000
+    data['well'].data['RHOB'] = data['well'].data['RHOB'] * 1000
 
     #Despiking
     #Sonic Despiking
-    dt = data['well']['DT']
-    data['well']['DT_DS'] = dt.despike(window_length=50, z=2)
+    dt = data['well'].data['DT']
+    data['well'].data['DT_DS'] = dt.despike(window_length=50, z=2)
 
     #Density Despiking
-    den = data['well']['RHOB']
-    data['well']['RHOB_DS'] = den.despike(window_length=50, z=2)
+    den = data['well'].data['RHOB']
+    data['well'].data['RHOB_DS'] = den.despike(window_length=50, z=2)
 
     #Smoothing 
     #Sonic Smoothing
-    dt_ds = data['well']['DT_DS']
-    data['well']['DT_DS_SM'] = dt_ds.smooth(window_length=10, samples=False)
+    dt_ds = data['well'].data['DT_DS']
+    data['well'].data['DT_DS_SM'] = dt_ds.smooth(window_length=10, samples=False)
 
     #Density Smoothing
-    den_ds = data['well']['RHOB_DS']
-    data['well']['RHOB_DS_SM'] = den_ds.smooth(window_length=10, samples=False)
+    den_ds = data['well'].data['RHOB_DS']
+    data['well'].data['RHOB_DS_SM'] = den_ds.smooth(window_length=10, samples=False)
     return data
 
 def time_depth_relationship(data, ):
@@ -71,17 +71,18 @@ def time_depth_relationship(data, ):
     gap_int = log_start - kb
     repl_vel = 2632                # this is from VSP data knowledge (m/s)
     log_start_time = 2.0 * gap_int / repl_vel        # 2 for twt
+    dt = data['well'].data['DT']
 
     #first replace NaN values with zero
     dt_iterval = np.nan_to_num(dt) * 0.1524 / 1e6
     t_cum =  np.cumsum(dt_iterval) * 2
-    data['well']['TWT'] = t_cum + log_start_time
-    data['well'] = data['well'].df()
+    data['well'].data['TWT'] = t_cum + log_start_time
+    data['well'].data = data['well'].df()
     return data
 
-def ia(data):
+def ai(data):
     # Sonic velocity calculate
-    data['well']['Vsonic'] = 1e6/df.DT_DS_SM                    #(unit: m/s)
+    data['well']['Vsonic'] = 1e6/data['well']['DT_DS_SM']                    #(unit: m/s)
     # AI calculate
     data['well']['AI'] = data['well']['Vsonic'] * data['well']['RHOB_DS_SM']        #(unit: kg/m2.s)
     return data
