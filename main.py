@@ -36,25 +36,8 @@ if __name__ == "__main__":
   # reflectivity coefficients `rc` profile (in time)
   data = rc_time(data)
 
-  # inputs
-  wavelets = ['ricker', 'outro_tipo_1', 'outro_tipo_2']
-  freqs = np.linspace(5,31,5)
-  times = np.linspace(-0.1,0.1,0.02)
-
-  for iwvlt in wavelets:
-    for ifreq in freqs:
-      # convolution of the wavelet with `rc` to obtain
-      wvlt = get_wavelet(iwvlt, ifreq)
-
-      # the synthetic seismogram
-      data = wvlt_conv(data, wvlt)
-
-      for itimes in times:
-        # evaluate the recovered signal
-        score = evaluate_results(data) 
-
-        # append to dataframe 
-        # df.append()
+  # convolution of the wavelet with `rc` to obtain the synthetic seismogram
+  data = synthetic_seismogram(data)
 
   # export data to Decision Workspace
   export_data(data)

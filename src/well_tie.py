@@ -5,6 +5,8 @@ import pandas as pd
 import lasio
 import numpy as np
 
+from src.wavelet_choice import *
+
 def read_inputs(jpath):
     with open(jpath) as file:
         paths = json.load(file)
@@ -112,27 +114,13 @@ def rc_time(data):
 
     return data
 
-# define function of ricker wavelet
-def ricker(f, length, dt):
-    t0 = np.arange(-length/2, (length-dt)/2, dt)
-    y = (1.0 - 2.0*(np.pi**2)*(f**2)*(t0**2)) * np.exp(-(np.pi**2)*(f**2)*(t0**2))
-    return t0, y
+def synthetic_seismogram(data):
 
-def wvlt_conv(data):
-    # TO DO: become smart
-    f=20            #wavelet frequency
-    length=0.512    #Wavelet vector length
-    dt=0.001        # Sampling prefer to use smiliar to resampled AI
-    
-    t0, w = ricker (f, length, dt) # ricker wavelet 
-    synthetic = np.convolve(w, data['Rc_tdom'], mode='same')
+    data['wavelet_analysis'] = all_wavelet_and_cc(data)
+    w = find_best_wavelet(data['wavelet_analysis'])
+    data['synthetic seismogram'] = np.convolve(w, data['Rc_tdom'], mode='same')
 
-    data['synthetic seismogram'] = synthetic
     return data
-
-def evaluate_results(data):
-    score = []
-    return score
 
 def export_data(data):
     return None
