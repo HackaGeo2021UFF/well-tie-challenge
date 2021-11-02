@@ -1,0 +1,5 @@
+{
+"well":"data/KK1.las",
+"tops":"data/Tops.csv",
+"seismic":"data/around_well_seismic.csv"
+}
