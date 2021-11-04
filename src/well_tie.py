@@ -134,4 +134,6 @@ def synthetic_seismogram(data):
     return data
 
 def export_data(data):
+    df = pd.DataFrame(data['synthetic seismogram'], columns=['amplitude'])
+    df.to_csv('outputs/synthetic_seismogram.csv', index=False)
     return None
