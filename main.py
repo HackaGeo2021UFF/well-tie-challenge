@@ -1,37 +1,43 @@
-from os import path
-from src import read_data as rd
-from src import wellfunctions as wf
-from typing import Type
-from welly import Well
-import pandas as pd
-import lasio
+'''
+This file automates the well-tieing process
+
+Usage is:
+
+"python main.py inputs.json"
+
+Arguments
+    inputs.json: string
+      the json file with its inputs
+'''
+
+import sys
 import numpy as np
-import matplotlib.pyplot as plt
 
-# download the data
-import git
-#git.Git("/content").clone("https://github.com/mardani72/Synthetic_Seismogram.git")
+if __name__ == "__main__":
 
-#setting the path and reading data
-w_path = 'Synthetic_Seismogram/KK1.las'
-w = rd.read_las(w_path)
+  # lib
+  from src.well_tie import *
 
-#
-wf.despike_smoothing(w)
+  # user inputs `ui` passed as a json file
+  ui = read_inputs(sys.argv[1])
 
-# Depth of logging starts(m) from header
-log_start = 1517.0   
-# Kelly Bushing elevation(m) from header
-kb = 15 
-# define the gap velocity
-repl_vel = 2632                # this is from VSP data knowledge (m/s)
+  # read data defined in the input file
+  data = read_data(ui)
 
-wf.twowaytime(log_start,kb,repl_vel,w)
+  # pre-processing of data
+  data = pre_processing_data(data)
 
-df = w.df()
+  # time-depth relationship `tdr` from DT
+  data = time_depth_relationship(data)
 
-wf.acoustic_imp(df)
+  # acoustic impedance
+  data = ai(data)
 
-wf.reflection_coefficient(df)
+  # reflectivity coefficients `rc` profile (in time)
+  data = rc_time(data)
 
-wf.reflectivitycoeficienttimedomain(wf.acusticimpedancetimedomain(df))
+  # convolution of the wavelet with `rc` to obtain the synthetic seismogram
+  data = synthetic_seismogram(data)
+
+  # export data to Decision Workspace
+  export_data(data)
