@@ -35,9 +35,16 @@ def read_data(ui):
     tops_dict = dict(df_top.values.tolist())    
 
     # read seismic arround well
-    seismic_df = pd.read_csv(ui['seismic'])     
+    seismic_df = pd.read_csv(ui['seismic']) 
 
-    data = {'well':well,'tops':tops_dict,'seismic':seismic_df}
+    # read wavelet
+    if ui['wavelet'] == "":
+        wavelet = None
+    else:    
+        # wavelet = pd.read.csv(ui['wavelet']) 
+        wavelet = None
+
+    data = {'well':well,'tops':tops_dict,'seismic':seismic_df, 'wavelet':wavelet}
     return data
 
 def pre_processing_data(data):
@@ -116,8 +123,12 @@ def rc_time(data):
 
 def synthetic_seismogram(data):
 
-    data['wavelet_analysis'] = all_wavelet_and_cc(data)
-    w = find_best_wavelet(data['wavelet_analysis'])
+    if data['wavelet'] == None:
+        data['wavelet_analysis'] = all_wavelet_and_cc(data)
+        w = find_best_wavelet(data['wavelet_analysis'])
+    else:
+        w = data['wavelet']
+    
     data['synthetic seismogram'] = np.convolve(w, data['Rc_tdom'], mode='same')
 
     return data
