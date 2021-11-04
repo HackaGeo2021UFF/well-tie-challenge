@@ -41,5 +41,6 @@ def all_wavelet_and_cc(data):
 def find_best_wavelet(wvlts):
     cc, freq, wvlt, dindex = sorted(wvlts, reverse=True)[0]
     w = wvlt(freq)
+    print("Best wavelet: f = %.2f, dindex = %i and CC = %.2f"%(freq,dindex,cc))
     # TO DO: delta index
     return w
