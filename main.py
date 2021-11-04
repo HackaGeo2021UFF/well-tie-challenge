@@ -19,7 +19,11 @@ if __name__ == "__main__":
   from src.well_tie import *
 
   # user inputs `ui` passed as a json file
-  ui = read_inputs(sys.argv[1])
+  if len(sys.argv) == 1:
+        path = "data/inputs.json"
+  else:
+        path = sys.argv[1]
+  ui = read_inputs(path)
 
   # read data defined in the input file
   data = read_data(ui)
