@@ -9,11 +9,48 @@ from segysak.segy import segy_header_scan, segy_header_scrape, get_segy_texthead
 
 # function to find closest trace
 def closest_trace(well_pos, seismic_traces_pos):
+    """
+    closest_trace finds the closest trace in `seismic_traces_pos` to `well_pos`
+
+    Parameters
+    ----------
+    well_pos : numpy.array
+        A np.array([x,y]) with the `x` and `y` projected coordinates. 
+        shape = (2,)
+    seismic_traces_pos : numpy.array
+        A np.array([x,y]) with the `x` and `y` projected coordinates
+        shape = (2,n)
+
+    Returns
+    -------
+    np.argmin(dist_2): int
+        Returns the index that contains the closest trace to `well_pos` in `seismic_traces_pos`
+
+    """
+
     seismic_traces_pos = np.asarray(seismic_traces_pos)
     dist_2 = np.sum((seismic_traces_pos - well_pos)**2, axis=1)
     return np.argmin(dist_2)
 
 def extract_seismic_trace(well_file, segy_file):
+    """
+    extract_seismic_trace extracts the closest trace in `segy_file` to `well_file`
+
+    Parameters
+    ----------
+    well_file : string
+        The path to the well file
+    segy_file : string
+        The path to the seg-y file
+
+    Returns
+    -------
+    seisnc_aropund_well.values: numpy.array
+        An array with the amplitude values with the `t` time coordinates
+    t: numpy.array
+        An array with the time coordinates    
+
+    """    
 
     # well filepath
     # w_path = '6507_8-1_DT_RHOB.LAS'
@@ -60,7 +97,29 @@ def extract_seismic_trace(well_file, segy_file):
     return seisnc_aropund_well.values, t
 
 def evaluate_results(synth_seism, t_synth, seis_tr, t_seis_tr):
+    """
+    evaluate_results calculates the Pearson correlation coefficient between 
+    two different seismic signals with different time coordinates
+
+    Parameters
+    ----------
+    synth_seism : numpy.array
+        The syntheticc seismogram recovered from the well-tie process
+    t_synth : numpy.array
+        The time coordinates for the `synth_seism` signal
+    seis_tr : numpy.array
+        The seismic trace extracted from the seg-y file
+    t_seis_tr : numpy.array
+        The time coordinates for the `seis_tr` signal
+
+    Returns
+    -------
+    r: float
+        The Pearson correlation coefficient R
+
+    """    
     
+    # interpolate the synthetic seismogram onto the seismic trace time coordinates
     n_synthetic = np.interp(x=t_seis_tr, xp = t_synth, fp = synth_seism)
 
     # seis_tr = seis_tr.mean(axis = 1)
