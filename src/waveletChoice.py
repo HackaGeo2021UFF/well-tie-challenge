@@ -34,12 +34,12 @@ def evaluate_results(tr_synth, t_synth, tr_seis, t_seis):
     """    
     
     # interpolate the synthetic seismogram onto the seismic trace time coordinates
-    n_synthetic = np.interp(x=t_seis, xp = t_synth, fp = tr_synth)
+    n_synth = np.interp(x=t_seis, xp = t_synth, fp = tr_synth)
 
     # amp_seis = amp_seis.mean(axis = 1)
-    r = np.corrcoef(n_synthetic, tr_synth)
+    r = np.corrcoef(n_synth, tr_seis)
 
-    return r
+    return r[0][1]
 
 def all_wavelet_and_cc(data):
     table = []
@@ -48,11 +48,27 @@ def all_wavelet_and_cc(data):
     
     indexs = np.arange(-30, 30, 1)
     n = len(indexs)
-    freqs = np.linspace(5, 31, n)
+    freqs = np.linspace(2, 31, n)
 
     t_synth = data['seismic']['t']
     t_seis = data['seismic']['t']
     tr_seis = data['seismic']['tr_seis']
+
+    i_min = None
+    t_min = np.array(data['well']['TWT'])[0]
+    for i in range(len(t_synth)):
+        if t_synth[i] >= t_min and i_min == None:
+            i_min = i
+    
+    i_max = None
+    t_max = np.array(data['well']['TWT'])[-1]
+    for i in range(len(t_synth)-1,-1,-1):
+        if t_synth[i] <= t_max and i_max == None:
+            i_max = i
+
+    t_synth = t_synth[i_min:i_max]
+    t_seis = t_seis[i_min:i_max]
+    tr_seis = tr_seis[i_min:i_max]
 
     for iwvlt in wavelets:
         for ifreq in freqs:
@@ -60,6 +76,7 @@ def all_wavelet_and_cc(data):
             w = iwvlt(ifreq)
             # the synthetic seismogram
             tr_synth = np.convolve(w, data['Rc_tdom'], mode='same')
+            tr_synth = tr_synth[i_min:i_max]
             for iindex in indexs:
                 # evaluate the recovered signal
                 cc_score = evaluate_results(tr_synth, t_synth, tr_seis, t_seis) 
