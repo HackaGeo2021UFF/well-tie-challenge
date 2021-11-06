@@ -5,7 +5,8 @@ import pandas as pd
 import lasio
 import numpy as np
 
-from src.wavelet_choice import *
+from src.waveletChoice import *
+from src.seismicManipulation import *
 
 def read_inputs(jpath):
     with open(jpath) as file:
@@ -33,9 +34,15 @@ def read_data(ui):
     df_top = pd.read_csv(ui['tops'])            
     # convert to dictionary
     tops_dict = dict(df_top.values.tolist())    
+     
+    # read cube seismic
 
-    # read seismic arround well
-    seismic_df = pd.read_csv(ui['seismic']) 
+    # dado do desafio, usar somente no ambiente remoto
+    #seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
+
+    # dado de exemplo, pode usar na máquina pessoal
+    df = pd.read_csv(ui['seismic'])
+    seismic_trace = df.time, df.cdp409
 
     # read wavelet
     if ui['wavelet'] == "":
@@ -44,7 +51,7 @@ def read_data(ui):
         # wavelet = pd.read.csv(ui['wavelet']) 
         wavelet = None
 
-    data = {'well':well,'tops':tops_dict,'seismic':seismic_df, 'wavelet':wavelet}
+    data = {'well':well,'tops':tops_dict,'seismic':seismic_trace, 'wavelet':wavelet}
     return data
 
 def pre_processing_data(data):
@@ -91,7 +98,7 @@ def time_depth_relationship(data):
 
 def ai(data):
     # Sonic velocity calculate
-    data['well']['Vsonic'] = 1e6/data['well']['DT_DS_SM']                    #(unit: m/s)
+    data['well']['Vsonic'] = 1e6/data['well']['DT_DS_SM']                           #(unit: m/s)
     # AI calculate
     data['well']['AI'] = data['well']['Vsonic'] * data['well']['RHOB_DS_SM']        #(unit: kg/m2.s)
     return data
@@ -124,16 +131,17 @@ def rc_time(data):
 def synthetic_seismogram(data):
 
     if data['wavelet'] == None:
-        data['wavelet_analysis'] = all_wavelet_and_cc(data)
-        w = find_best_wavelet(data['wavelet_analysis'])
+        wvlts = all_wavelet_and_cc(data)
+        w = find_best_wavelet(wvlts)
     else:
         w = data['wavelet']
     
-    data['synthetic seismogram'] = np.convolve(w, data['Rc_tdom'], mode='same')
+    data['well']['synthetic seismogram'] = np.convolve(w, data['Rc_tdom'], mode='same')
 
     return data
 
 def export_data(data):
-    df = pd.DataFrame(data['synthetic seismogram'], columns=['amplitude'])
-    df.to_csv('outputs/synthetic_seismogram.csv', index=False)
+    df = pd.DataFrame(data['well'], columns=['amplitude'])
+    df.to_csv('outputs/well_tie.csv', index=False)
     return None
+

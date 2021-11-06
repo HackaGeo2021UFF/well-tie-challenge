@@ -32,9 +32,9 @@ def closest_trace(well_pos, seismic_traces_pos):
     dist_2 = np.sum((seismic_traces_pos - well_pos)**2, axis=1)
     return np.argmin(dist_2)
 
-def extract_seismic_trace(well_file, segy_file):
+def extract_realmic_trace(well_file, segy_file):
     """
-    extract_seismic_trace extracts the closest trace in `segy_file` to `well_file`
+    extract_realmic_trace extracts the closest trace in `segy_file` to `well_file`
 
     Parameters
     ----------
@@ -93,36 +93,6 @@ def extract_seismic_trace(well_file, segy_file):
 
     # extract time
     t = seisnc_aropund_well.twt.values
+    amplitude = seisnc_aropund_well.data.values[0]
 
-    return seisnc_aropund_well.values, t
-
-def evaluate_results(synth_seism, t_synth, seis_tr, t_seis_tr):
-    """
-    evaluate_results calculates the Pearson correlation coefficient between 
-    two different seismic signals with different time coordinates
-
-    Parameters
-    ----------
-    synth_seism : numpy.array
-        The syntheticc seismogram recovered from the well-tie process
-    t_synth : numpy.array
-        The time coordinates for the `synth_seism` signal
-    seis_tr : numpy.array
-        The seismic trace extracted from the seg-y file
-    t_seis_tr : numpy.array
-        The time coordinates for the `seis_tr` signal
-
-    Returns
-    -------
-    r: float
-        The Pearson correlation coefficient R
-
-    """    
-    
-    # interpolate the synthetic seismogram onto the seismic trace time coordinates
-    n_synthetic = np.interp(x=t_seis_tr, xp = t_synth, fp = synth_seism)
-
-    # seis_tr = seis_tr.mean(axis = 1)
-    r = np.corrcoef(n_synthetic,seis_tr)
-
-    return r
+    return amplitude, t
