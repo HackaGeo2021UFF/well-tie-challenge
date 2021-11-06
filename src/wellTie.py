@@ -42,7 +42,7 @@ def read_data(ui):
 
     # dado de exemplo, pode usar na máquina pessoal
     df = pd.read_csv(ui['seismic'])
-    seismic_trace = df.time, df.cdp409
+    seismic_trace = df.cdp409, df.time
 
     # read wavelet
     if ui['wavelet'] == "":
@@ -144,4 +144,3 @@ def export_data(data):
     df = pd.DataFrame(data['well'], columns=['amplitude'])
     df.to_csv('outputs/well_tie.csv', index=False)
     return None
-
