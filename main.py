@@ -16,7 +16,7 @@ import numpy as np
 if __name__ == "__main__":
 
   # lib
-  from src.well_tie import *
+  from src.wellTie import *
 
   # user inputs `ui` passed as a json file
   if len(sys.argv) == 1:
