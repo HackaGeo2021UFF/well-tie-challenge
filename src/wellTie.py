@@ -38,11 +38,12 @@ def read_data(ui):
     # read cube seismic
 
     # dado do desafio, usar somente no ambiente remoto
-    #seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
+    #tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
 
     # dado de exemplo, pode usar na máquina pessoal
     df = pd.read_csv(ui['seismic'])
-    seismic_trace = df.cdp409, df.time
+    tr_seis, t_seis = np.array(df.cdp409), np.array(df.time)
+    seismic = pd.DataFrame({'t':t_seis, 't_synth':np.zeros(len(tr_seis)), 'tr_seis':tr_seis})
 
     # read wavelet
     if ui['wavelet'] == "":
@@ -51,7 +52,7 @@ def read_data(ui):
         # wavelet = pd.read.csv(ui['wavelet']) 
         wavelet = None
 
-    data = {'well':well,'tops':tops_dict,'seismic':seismic_trace, 'wavelet':wavelet}
+    data = {'well':well,'tops':tops_dict,'seismic':seismic, 'wavelet':wavelet}
     return data
 
 def pre_processing_data(data):
@@ -113,10 +114,7 @@ def rc_time(data):
     # Let's add Rc into dataframe as new column
     data['well']['Rc'] = pd.Series(Rc, index=data['well'].index)
 
-    dt = 0.004   #sampleing interval
-    t_max = 5.5   # max time to create time vector
-    t = np.arange(0, t_max+dt, dt)
-    AI_tdom = np.interp(x=t, xp = data['well'].TWT, fp = data['well'].AI)    #resampling
+    AI_tdom = np.interp(x=data['seismic']['t'], xp = data['well'].TWT, fp = data['well'].AI)    #resampling
 
     # again Rc calulation but in reampled time domain
     Rc_tdom = []

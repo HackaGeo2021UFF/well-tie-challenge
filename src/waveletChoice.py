@@ -10,7 +10,7 @@ def ricker(f):
 def band_pass():
     return np.zeros(1)
 
-def evaluate_results(tr_synth, t_synth, tr_real, t_real):
+def evaluate_results(tr_synth, t_synth, tr_seis, t_seis):
     """
     evaluate_results calculates the Pearson correlation coefficient between 
     two different seismic signals with different time coordinates
@@ -21,9 +21,9 @@ def evaluate_results(tr_synth, t_synth, tr_real, t_real):
         The syntheticc seismogram recovered from the well-tie process
     t_synth : numpy.array
         The time coordinates for the `tr_synth` signal
-    tr_real : numpy.array
+    tr_seis : numpy.array
         The seismic trace extracted from the seg-y file
-    t_real : numpy.array
+    t_seis : numpy.array
         The time coordinates for the `amp_seis` signal
 
     Returns
@@ -34,7 +34,7 @@ def evaluate_results(tr_synth, t_synth, tr_real, t_real):
     """    
     
     # interpolate the synthetic seismogram onto the seismic trace time coordinates
-    n_synthetic = np.interp(x=t_real, xp = t_synth, fp = tr_synth)
+    n_synthetic = np.interp(x=t_seis, xp = t_synth, fp = tr_synth)
 
     # amp_seis = amp_seis.mean(axis = 1)
     r = np.corrcoef(n_synthetic, tr_synth)
@@ -50,18 +50,19 @@ def all_wavelet_and_cc(data):
     n = len(indexs)
     freqs = np.linspace(5, 31, n)
 
-    t_synth = data['well']['TWT']
-    tr_real, t_real = data['seismic']
+    t_synth = data['seismic']['t']
+    t_seis = data['seismic']['t']
+    tr_seis = data['seismic']['tr_seis']
 
     for iwvlt in wavelets:
         for ifreq in freqs:
             # convolution of the wavelet with `rc` to obtain
             w = iwvlt(ifreq)
             # the synthetic seismogram
-            traco_synth = np.convolve(w, data['Rc_tdom'], mode='same')
+            tr_synth = np.convolve(w, data['Rc_tdom'], mode='same')
             for iindex in indexs:
                 # evaluate the recovered signal
-                cc_score = evaluate_results(traco_synth, t_synth, tr_real, t_real) 
+                cc_score = evaluate_results(tr_synth, t_synth, tr_seis, t_seis) 
                 table += [[cc_score, ifreq, iwvlt, iindex]]
 
     return table
