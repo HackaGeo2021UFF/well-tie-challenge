@@ -129,11 +129,11 @@ def synthetic_seismogram(data):
     else:
         w = data['wavelet']
     
-    data['well']['synthetic seismogram'] = np.convolve(w, data['Rc_tdom'], mode='same')
+    data['seismic']['tr_synth'] = np.convolve(w, data['Rc_tdom'], mode='same')
 
     return data
 
 def export_data(data):
-    df = pd.DataFrame(data['well'], columns=['amplitude'])
-    df.to_csv('outputs/well_tie.csv', index=False)
+    #df = pd.DataFrame(data['well'], columns=['amplitude'])
+    #df.to_csv('outputs/well_tie.csv', index=False)
     return None
