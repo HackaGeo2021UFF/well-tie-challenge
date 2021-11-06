@@ -30,11 +30,6 @@ def read_data(ui):
     # read well .las
     well = Well.from_las(ui['well'])       
 
-    # read from csv file into dataframe
-    df_top = pd.read_csv(ui['tops'])            
-    # convert to dictionary
-    tops_dict = dict(df_top.values.tolist())    
-     
     # read cube seismic
 
     # dado do desafio, usar somente no ambiente remoto
@@ -52,7 +47,7 @@ def read_data(ui):
         # wavelet = pd.read.csv(ui['wavelet']) 
         wavelet = None
 
-    data = {'well':well,'tops':tops_dict,'seismic':seismic, 'wavelet':wavelet}
+    data = {'well':well,'seismic':seismic, 'wavelet':wavelet}
     return data
 
 def pre_processing_data(data):

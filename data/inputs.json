@@ -1,6 +1,5 @@
 {
 "well":"data/example/KK1.las",
-"tops":"data/example/Tops.csv",
 "seismic":"data/example/around_well_seismic.csv",
 "wavelet":""
 }
