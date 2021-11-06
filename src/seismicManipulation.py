@@ -32,9 +32,9 @@ def closest_trace(well_pos, seismic_traces_pos):
     dist_2 = np.sum((seismic_traces_pos - well_pos)**2, axis=1)
     return np.argmin(dist_2)
 
-def extract_realmic_trace(well_file, segy_file):
+def extract_seismic_trace(well_file, segy_file):
     """
-    extract_realmic_trace extracts the closest trace in `segy_file` to `well_file`
+    extract_seismic_trace extracts the closest trace in `segy_file` to `well_file`
 
     Parameters
     ----------
