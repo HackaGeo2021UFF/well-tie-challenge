@@ -38,6 +38,7 @@ def read_data(ui):
     # dado de exemplo, pode usar na máquina pessoal
     df = pd.read_csv(ui['seismic'])
     tr_seis, t_seis = np.array(df.cdp409), np.array(df.time)
+    
     seismic = pd.DataFrame({'t':t_seis, 't_synth':np.zeros(len(tr_seis)), 'tr_seis':tr_seis})
 
     # read wavelet
@@ -54,6 +55,7 @@ def pre_processing_data(data):
     #unit convert to µs/m
     data['well'].data['DT'] = data['well'].data['DT'] / 0.3048  
     #unit convert to kg/m3  
+    #data['well'].data['RHOB'] = data['well'].data['RHOB-EDIT'] * 1000
     data['well'].data['RHOB'] = data['well'].data['RHOB'] * 1000
 
     #Despiking
@@ -73,23 +75,23 @@ def pre_processing_data(data):
     #Density Smoothing
     den_ds = data['well'].data['RHOB_DS']
     data['well'].data['RHOB_DS_SM'] = den_ds.smooth(window_length=10, samples=False)
+    data['well'] = data['well'].df()
     return data
 
 def time_depth_relationship(data):
     ### just an exemple
     ### TO DO: become smart
-    log_start = 1517               # Depth of logging starts(m) from header
-    kb = 15                        # Kelly Bushing elevation(m) from header
+    log_start = data['well'].index[0]           # Depth of logging starts(m) from header
+    kb = 15                                     # Kelly Bushing elevation(m) from header
     gap_int = log_start - kb
-    repl_vel = 2632                # this is from VSP data knowledge (m/s)
+    repl_vel = 2632                             # this is from VSP data knowledge (m/s)
     log_start_time = 2.0 * gap_int / repl_vel        # 2 for twt
-    dt = data['well'].data['DT']
+    dt = data['well']['DT']
 
     #first replace NaN values with zero
     dt_iterval = np.nan_to_num(dt) * 0.1524 / 1e6
     t_cum =  np.cumsum(dt_iterval) * 2
-    data['well'].data['TWT'] = t_cum + log_start_time
-    data['well'] = data['well'].df()
+    data['well']['TWT'] = t_cum + log_start_time
     return data
 
 def ai(data):

@@ -20,7 +20,8 @@ if __name__ == "__main__":
 
   # user inputs `ui` passed as a json file
   if len(sys.argv) == 1:
-        path = "data/inputs.json"
+        path = "data/inputs_example.json"
+        #path = "data/inputs_hackageo.json"
   else:
         path = sys.argv[1]
   ui = read_inputs(path)
