@@ -41,6 +41,10 @@ def evaluate_results(tr_synth, t_synth, tr_seis, t_seis):
 
     return r[0][1]
 
+def turn_zero(i_min,i_max,x):
+    for i in range(len(x)):
+
+
 def all_wavelet_and_cc(data):
     table = []
 
@@ -54,18 +58,19 @@ def all_wavelet_and_cc(data):
     t_seis = data['seismic']['t']
     tr_seis = data['seismic']['tr_seis']
 
-    #dt = (t_seis[1]-t_seis[0])*0.001
-    dt = (t_seis[1]-t_seis[0])
+    dt = (t_seis[1]-t_seis[0])*0.001
+    #dt = (t_seis[1]-t_seis[0])
     t_min = np.array(data['well']['TWT'])[0]
     i_min = int(np.rint(t_min/dt))
+
     t_max = np.array(data['well']['TWT'])[-1]
     i_max = int(np.rint(t_max/dt))
     
-    t_synth = t_synth[i_min:i_max]
-    t_seis = t_seis[i_min:i_max]
-    tr_seis = tr_seis[i_min:i_max]
+    #t_synth = t_synth[i_min:i_max]
+    #t_seis = t_seis[i_min:i_max]
+    #tr_seis = tr_seis[i_min:i_max]
 
-    print(i_min, i_max)
+    #print(i_min, i_max)
 
     for iwvlt in wavelets:
         for ifreq in freqs:
@@ -73,8 +78,8 @@ def all_wavelet_and_cc(data):
             w = iwvlt(ifreq)
             # the synthetic seismogram
             tr_synth = np.convolve(w, data['Rc_tdom'], mode='same')
-            tr_synth = tr_synth[i_min:i_max]
             print(tr_synth)
+            #tr_synth = tr_synth[i_min:i_max]
             for iindex in indexs:
                 # evaluate the recovered signal
                 cc_score = evaluate_results(tr_synth, t_synth, tr_seis, t_seis) 

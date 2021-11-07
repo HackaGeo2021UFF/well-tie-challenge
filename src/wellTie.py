@@ -33,11 +33,12 @@ def read_data(ui):
     # read cube seismic
 
     # dado do desafio, usar somente no ambiente remoto
-    #tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
+    tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
+    t_seis = t_seis/1e3
 
     # dado de exemplo, pode usar na máquina pessoal
-    df = pd.read_csv(ui['seismic'])
-    tr_seis, t_seis = np.array(df.cdp409), np.array(df.time)
+    #df = pd.read_csv(ui['seismic'])
+    #tr_seis, t_seis = np.array(df.cdp409), np.array(df.time)
     
     seismic = pd.DataFrame({'t':t_seis, 't_synth':np.zeros(len(tr_seis)), 'tr_seis':tr_seis})
 
@@ -52,11 +53,16 @@ def read_data(ui):
     return data
 
 def pre_processing_data(data):
+
+    data['well'].data['DT'] = np.nan_to_num(data['well'].data['DT'])
+    data['well'].data['RHOB-EDIT'] = np.nan_to_num(data['well'].data['RHOB-EDIT'])
+
+
     #unit convert to µs/m
     data['well'].data['DT'] = data['well'].data['DT'] / 0.3048  
     #unit convert to kg/m3  
-    #data['well'].data['RHOB'] = data['well'].data['RHOB-EDIT'] * 1000
-    data['well'].data['RHOB'] = data['well'].data['RHOB'] * 1000
+    data['well'].data['RHOB'] = data['well'].data['RHOB-EDIT'] * 1000
+    #data['well'].data['RHOB'] = data['well'].data['RHOB'] * 1000
 
     #Despiking
     #Sonic Despiking
@@ -82,9 +88,9 @@ def time_depth_relationship(data):
     ### just an exemple
     ### TO DO: become smart
     log_start = data['well'].index[0]           # Depth of logging starts(m) from header
-    kb = 15                                     # Kelly Bushing elevation(m) from header
+    kb = 29                                     # Kelly Bushing elevation(m) from header
     gap_int = log_start - kb
-    repl_vel = 2632                             # this is from VSP data knowledge (m/s)
+    repl_vel = (1500 + 2564)/2                  # this is from VSP data knowledge (m/s)
     log_start_time = 2.0 * gap_int / repl_vel        # 2 for twt
     dt = data['well']['DT']
 
@@ -96,30 +102,35 @@ def time_depth_relationship(data):
 
 def ai(data):
     # Sonic velocity calculate
-    data['well']['Vsonic'] = 1e6/data['well']['DT_DS_SM']                           #(unit: m/s)
+    Vsonic = []
+    for value in data['well']['DT_DS_SM']:
+        if value == 0:
+            Vsonic.append(0)
+        else:
+            Vsonic.append(1e6/value)
+
+    data['well']['Vsonic'] = np.array(Vsonic)                                       #(unit: m/s)
     # AI calculate
     data['well']['AI'] = data['well']['Vsonic'] * data['well']['RHOB_DS_SM']        #(unit: kg/m2.s)
     return data
 
-def rc_time(data):
-    Imp = data['well']['AI'].values
-    Rc=[]
-    for i in range(len(Imp)-1):
-        Rc.append((Imp[i+1]-Imp[i])/(Imp[i]+Imp[i+1]))
-    # to adjust vector size copy the last element to the tail
-    Rc.append(Rc[-1])
-    # Let's add Rc into dataframe as new column
-    data['well']['Rc'] = pd.Series(Rc, index=data['well'].index)
 
-    AI_tdom = np.interp(x=data['seismic']['t'], xp = data['well'].TWT, fp = data['well'].AI)    #resampling
+def rc_time(data):
+    AI_tdom = np.interp(x=data['seismic']['t'].to_numpy(), xp = data['well'].TWT.to_numpy(), fp = data['well'].AI.to_numpy())    #resampling
 
     # again Rc calulation but in reampled time domain
-    Rc_tdom = []
+    Rc_tdom = np.zeros(len(AI_tdom))
     for i in range(len(AI_tdom)-1):
-        Rc_tdom.append((AI_tdom[i+1]-AI_tdom[i])/(AI_tdom[i]+AI_tdom[i+1]))
+        dem = AI_tdom[i]+AI_tdom[i+1]
+        if dem == 0:
+            Rc_tdom[i] = 0
+        else:
+            Rc_tdom[i] = (AI_tdom[i+1]-AI_tdom[i])/dem
     # to adjust vector size copy the last element to the tail
-    Rc_tdom.append(Rc_tdom[-1])
+    Rc_tdom[-1] = Rc_tdom[-2]
+    
     data['Rc_tdom'] = Rc_tdom # pd.Series(Rc_tdom, index= data['well'].index)
+    data['AI_tdom'] = AI_tdom
 
     return data
 
