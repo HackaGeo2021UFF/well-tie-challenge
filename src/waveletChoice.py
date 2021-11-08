@@ -39,7 +39,23 @@ def evaluate_results(tr_synth, tr_seis):
     r = np.corrcoef(tr_synth, tr_seis)
 
     return r[0][1]
-  
+
+def matching(tr_seis, tr_synth):
+    
+    tr_seis_new = tr_seis.copy()
+
+    i = 0
+    while tr_synth[i] == 0 and i < len(tr_seis):
+        tr_seis_new[i] = 0
+        i += 1
+
+    i = len(tr_seis)-1
+    while tr_synth[i] != 0 and i >= 0:
+        tr_seis_new[i] = 0
+        i -= 1
+
+    return tr_seis_new 
+
 def best_wavelet(data):
     
     freqs = np.arange(5, 50+0.2, 0.2)
@@ -49,13 +65,16 @@ def best_wavelet(data):
     for freq in freqs:
 
         wavelet = ricker(freq)
-        seism_trace = data['seismic']['tr_seis'].to_numpy()
-        synthetic = np.convolve(wavelet, Rc_tdom, mode='same')
+        tr_seis = data['seismic']['tr_seis'].to_numpy()
+        tr_synth = np.convolve(wavelet, Rc_tdom, mode='same')
         
         for r in range(-10, 10):        #roll
 
-            synthetic_roll = np.roll(synthetic, r)
-            corr = np.corrcoef(synthetic_roll, seism_trace)[0][1]
+            tr_synth_roll = np.roll(tr_synth, r)
+
+            tr_seis_match = matching(tr_seis, tr_synth)
+        
+            corr = np.corrcoef(tr_synth_roll, tr_seis)[0][1]
             
             if corr > corr_index:
                 best_corr = corr
