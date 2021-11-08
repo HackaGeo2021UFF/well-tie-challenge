@@ -158,13 +158,23 @@ def synthetic_seismogram(data):
     data['seismic']['tr_synth'] = np.convolve(w, Rc_tdom, mode='same')
     return data
 
-def export_data(data):
+def export_data(data, ui):
     
     if 'outputs' not in os.listdir():
         os.mkdir('outputs')
 
-    td = data['well']['TWT']
-    td.to_csv('outputs/TD.dat')
+    with open('outputs/TD.dat','w') as file:
+        file.write('SYN1 ' + ui['uwi_poco']   + '\n')
+        file.write('SYN2 ' + ui['nome_poco']  + '\n')
+        file.write('SYN3 ' + ui['nome_synth'] + '\n')
+        file.write('SYN7 0 0 \n')
+
+        time = data['well']['TWT'].to_numpy()
+        depth = data['well'].index.to_numpy()
+        n = len(data['well'])
+        for i in range(n):
+            file.write('SYN7 ' + str(time[i]) + ' ' + str(depth[i]) + '\n')
+
     data['seismic'].to_csv('outputs/synth.dat', index=False)
     
     return None

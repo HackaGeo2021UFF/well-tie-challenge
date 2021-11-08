@@ -1,5 +1,8 @@
 {
 "well":"data/example/KK1.las",
 "seismic":"data/example/around_well_seismic.csv",
-"wavelet":""
+"wavelet":"",
+"uwi_poco":"x",
+"nome_poco":"y",
+"nome_synth":"z"
 }

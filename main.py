@@ -45,4 +45,4 @@ if __name__ == "__main__":
   data = synthetic_seismogram(data)
 
   # export data to Decision Workspace
-  export_data(data)
+  export_data(data, ui)
