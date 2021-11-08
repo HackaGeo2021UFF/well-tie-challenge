@@ -5,6 +5,7 @@ import pandas as pd
 import lasio
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 from src.waveletChoice import *
 from src.seismicManipulation import *
@@ -43,6 +44,10 @@ def read_data(ui):
     # dado do desafio, usar somente no ambiente remoto
     tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
     t_seis = t_seis/1e3
+
+    # dado de exemplo, pode usar na máquina pessoal
+    #df = pd.read_csv(ui['seismic'])
+    #tr_seis, t_seis = df.cdp409.to_numpy() , df.time.to_numpy()
     
     seismic = pd.DataFrame({'t':t_seis, 'tr_synth':np.zeros(len(tr_seis)), 'tr_seis':tr_seis})
 
@@ -143,12 +148,10 @@ def rc_time(data):
 def synthetic_seismogram(data):
 
     if data['wavelet'] == None:
-        cc, freq, roll = best_wavelet(data)
-        w = ricker(freq,  data)
+        cc, freq, roll, phase = best_wavelet(data)
+        w = ricker(freq, phase, data)
     else:
         w = data['wavelet']
-        roll = 0
-        cc = 0
         
     Rc_tdom = np.roll(data['well_tdom']['Rc_tdom'], roll)
     data['seismic']['tr_synth'] = np.convolve(w, Rc_tdom, mode='same')
@@ -159,32 +162,45 @@ def normalization(data):
     data['seismic']['tr_seis'] = data['seismic']['tr_seis']/np.max(data['seismic']['tr_seis'])
     return data
 
+def vizualization(data):
+    plt.plot(data['seismic']['tr_synth'])
+    plt.plot(data['seismic']['tr_seis'])
+    plt.show()    
+    return None
+
+
 def export_data(data, ui):
     
     if 'outputs' not in os.listdir():
         os.mkdir('outputs')
 
     with open('outputs/'+ui['nome_poco']+'_DT.dat','w') as file:
-        file.write('TDP1 ' + ui['uwi_poco']   + '\n')
-        file.write('TDP2 ' + ui['nome_poco']  + '\n')
-        file.write('TDP3 ' + ui['nome_td'] + '\n')
-        file.write('TDP5 0.0 0.0 \n')
+        file.write('TDP1   ' + ui['uwi_poco']   + '\n')
+        file.write('TDP2   ' + ui['nome_poco']  + '\n')
+        file.write('TDP3   ' + ui['nome_td'] + '\n')
+        file.write('TDP5   0.000000   0.000000\n')
 
         time = data['well']['TWT'].to_numpy()*1000
         depth = data['well'].index.to_numpy()
         n = len(data['well'])
         for i in range(n):
-            file.write('TDP5 ' + str(time[i]) + ' ' + str(depth[i]) + '\n')
+            line = 'TDP5   %.6f      '%time[i]
+            line = line[:21] 
+            line += '%.6f\n'%depth[i]
+            file.write(line)
   
     with open('outputs/'+ui['nome_poco']+'_synth.dat','w') as file:
-        file.write('SYN1 ' + ui['uwi_poco']   + '\n')
-        file.write('SYN2 ' + ui['nome_poco']  + '\n')
-        file.write('SYN3 ' + ui['nome_synth'] + '\n')
+        file.write('SYN1   ' + ui['uwi_poco']   + '\n')
+        file.write('SYN2   ' + ui['nome_poco']  + '\n')
+        file.write('SYN3   ' + ui['nome_synth'] + '\n')
 
         t = data['seismic']['t'].to_numpy()*1000
         amp = data['seismic']['tr_synth'].to_numpy()
         n = len(data['seismic'])
         for i in range(n):
-            file.write('SYN7 ' + str(t[i]) + ' ' + str(amp[i]) + '\n')
+            line = 'SYN7   %.6f      '%t[i]
+            line = line[:21] 
+            line += '%.6f\n'%amp[i]
+            file.write(line)
 
     return None

@@ -1,6 +1,7 @@
 import numpy as np
+from scipy import signal
 
-def ricker(freq_hz, data):
+def ricker(freq_hz, phase, data):
     t = data['seismic']['t']
     dt = t[1] - t[0]
     tempo = np.arange(-0.3, 0.3, dt)
@@ -8,10 +9,8 @@ def ricker(freq_hz, data):
 
     ricker = (1 - 0.5 * freq_central * freq_central * tempo * tempo) * \
         np.exp(-1/4 * freq_central * freq_central * tempo * tempo)
+    ricker = np.real(np.exp(1j*np.radians(phase)) * signal.hilbert(ricker))
     return ricker
-
-def band_pass():
-    return np.zeros(1)
 
 def evaluate_results(tr_synth, tr_seis):
     """
@@ -55,32 +54,32 @@ def matching(tr_synth, tr_seis):
 
 def best_wavelet(data):
     
-    freqs = np.arange(5, 50+0.2, 0.2)
-    rolls = np.arange(-10,101)
+    phases = np.arange(0,180,10)
+    freqs = np.arange(5, 50+0.2, 0.5)
+    rolls = np.arange(-10,10,1)
     tr_seis = data['seismic']['tr_seis'].to_numpy()
     Rc_tdom = data['well_tdom']['Rc_tdom']
     best_corr = None
-
-    for freq in freqs:
-
-        wavelet = ricker(freq, data)
-        tr_synth = np.convolve(wavelet, Rc_tdom, mode='same')
-        
-        for r in rolls:        #roll
-
-            tr_synth_roll = np.roll(tr_synth, r)
-            tr_seis_match = matching(tr_synth, tr_seis)
-            corr = evaluate_results(tr_synth_roll, tr_seis_match)
-            
-            if best_corr == None:
-                best_corr = corr
-                best_roll = r
-                best_freq = freq
-            elif corr > best_corr:
-                best_corr = corr
-                best_roll = r
-                best_freq = freq
     
-    print("Best wavelet: f = %.2f, index roll = %i and corr = %.3f"%(best_freq, best_roll, best_corr))
+    for freq in freqs:
+        for phase in phases:
+            wavelet = ricker(freq, phase, data)
+            tr_synth = np.convolve(wavelet, Rc_tdom, mode='same')            
+            for r in rolls:
+                tr_synth_roll = np.roll(tr_synth, r)
+                tr_seis_match = matching(tr_synth, tr_seis)
+                corr = evaluate_results(tr_synth_roll, tr_seis_match)
+                
+                if best_corr == None:
+                    best_corr = corr
+                    best_roll = r
+                    best_freq = freq
+                elif corr > best_corr:
+                    best_corr = corr
+                    best_roll = r
+                    best_freq = freq
+                    best_phase = phase
+    
+    print("Best wavelet: f = %.2f, index roll = %i, corr = %.3f and best phase = %i"%(best_freq, best_roll, best_corr, best_phase))
 
-    return best_corr, best_freq, int(best_roll)
+    return best_corr, best_freq, best_phase, best_roll
