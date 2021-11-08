@@ -93,14 +93,14 @@ def pre_processing_data(data):
     data['well'] = data['well'].df()
     return data
 
-def time_depth_relationship(data):
+def time_depth_relationship(data, ui):
     ### just an exemple
     ### TO DO: become smart
     log_start = data['well'].index[0]           # Depth of logging starts(m) from header
-    kb = 29                                     # Kelly Bushing elevation(m) from header
+    kb = ui['kb']                               # Kelly Bushing elevation(m) from header
     gap_int = log_start - kb
     v_water = 1500
-    t_water_botton = 0.472
+    t_water_botton = ui['t_water_botton']
     log_start_time = t_water_botton + 2*(log_start - v_water*t_water_botton/2)*(np.array(data['well']['DT'])[0]/1e6) 
 
     #first replace NaN values with zero

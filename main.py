@@ -33,7 +33,7 @@ if __name__ == "__main__":
   data = pre_processing_data(data)
 
   # time-depth relationship `tdr` from DT
-  data = time_depth_relationship(data)
+  data = time_depth_relationship(data, ui)
 
   # acoustic impedance
   data = ai(data)
