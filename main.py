@@ -20,8 +20,7 @@ if __name__ == "__main__":
 
   # user inputs `ui` passed as a json file
   if len(sys.argv) == 1:
-        path = "data/inputs_example.json"
-        #path = "data/inputs_hackageo.json"
+        path = "data/inputs_hackageo.json"
   else:
         path = sys.argv[1]
   ui = read_inputs(path)
@@ -43,6 +42,8 @@ if __name__ == "__main__":
 
   # convolution of the wavelet with `rc` to obtain the synthetic seismogram
   data = synthetic_seismogram(data)
+
+  data = normalization(data)
 
   # export data to Decision Workspace
   export_data(data, ui)

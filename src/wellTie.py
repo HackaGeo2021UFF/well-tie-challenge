@@ -41,12 +41,8 @@ def read_data(ui):
     # read cube seismic
 
     # dado do desafio, usar somente no ambiente remoto
-    #tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
-    #t_seis = t_seis/1e3
-
-    # dado de exemplo, pode usar na máquina pessoal
-    df = pd.read_csv(ui['seismic'])
-    tr_seis, t_seis = df.cdp409.to_numpy() , df.time.to_numpy()
+    tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
+    t_seis = t_seis/1e3
     
     seismic = pd.DataFrame({'t':t_seis, 'tr_synth':np.zeros(len(tr_seis)), 'tr_seis':tr_seis})
 
@@ -63,8 +59,8 @@ def read_data(ui):
 def pre_processing_data(data):
     
     data['well'].data['DT'] = np.nan_to_num(data['well'].data['DT'])
-    #data['well'].data['RHOB'] = np.nan_to_num(data['well'].data['RHOB-EDIT'])
-    data['well'].data['RHOB'] = np.nan_to_num(data['well'].data['RHOB'])
+    data['well'].data['RHOB'] = np.nan_to_num(data['well'].data['RHOB-EDIT'])
+    #data['well'].data['RHOB'] = np.nan_to_num(data['well'].data['RHOB'])
 
 
     #unit convert to µs/m
@@ -158,28 +154,34 @@ def synthetic_seismogram(data):
     data['seismic']['tr_synth'] = np.convolve(w, Rc_tdom, mode='same')
     return data
 
+def normalization(data):
+    data['seismic']['tr_synth'] = data['seismic']['tr_synth']/np.max(data['seismic']['tr_synth'])
+    data['seismic']['tr_seis'] = data['seismic']['tr_seis']/np.max(data['seismic']['tr_seis'])
+    return data
+
 def export_data(data, ui):
     
     if 'outputs' not in os.listdir():
         os.mkdir('outputs')
 
-    with open('outputs/TD.dat','w') as file:
+    with open('outputs/'+ui['nome_poco']+'_DT.dat','w') as file:
         file.write('TDP1 ' + ui['uwi_poco']   + '\n')
         file.write('TDP2 ' + ui['nome_poco']  + '\n')
         file.write('TDP3 ' + ui['nome_td'] + '\n')
+        file.write('TDP5 0.0 0.0 \n')
 
-        time = data['well']['TWT'].to_numpy()
+        time = data['well']['TWT'].to_numpy()*1000
         depth = data['well'].index.to_numpy()
         n = len(data['well'])
         for i in range(n):
-            file.write('SYN7 ' + str(time[i]) + ' ' + str(depth[i]) + '\n')
+            file.write('TDP5 ' + str(time[i]) + ' ' + str(depth[i]) + '\n')
   
-    with open('outputs/synth.dat','w') as file:
+    with open('outputs/'+ui['nome_poco']+'_synth.dat','w') as file:
         file.write('SYN1 ' + ui['uwi_poco']   + '\n')
         file.write('SYN2 ' + ui['nome_poco']  + '\n')
         file.write('SYN3 ' + ui['nome_synth'] + '\n')
 
-        t = data['seismic']['t'].to_numpy()
+        t = data['seismic']['t'].to_numpy()*1000
         amp = data['seismic']['tr_synth'].to_numpy()
         n = len(data['seismic'])
         for i in range(n):
