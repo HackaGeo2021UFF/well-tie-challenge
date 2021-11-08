@@ -1,0 +1,10 @@
+json5==0.9.5
+wellpathpy==0.4.0
+welly==0.4.10
+pandas==1.2.4
+lasio==0.29
+numpy==1.19.5
+matplotlib @ file:///tmp/build/80754af9/matplotlib-suite_1613407855456/work
+scipy @ file:///tmp/build/80754af9/scipy_1618855647378/work
+segysak==0.3.3
+xarray==0.19.0
