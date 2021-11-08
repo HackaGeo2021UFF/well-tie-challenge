@@ -1,11 +1,11 @@
 {
-"well":"data/6507_8-1_DT_RHOB.LAS",
-"seismic":"data/full_offset-cmp_02.sgy",
-"wavelet":"",
-"uwi_poco":"x",
-"nome_poco":"y",
-"nome_synth":"z",
-"nome_td":"w",
-"kb": 29,
-"t_water_botton":0.472
+    "well":"data/6507_8-1_DT_RHOB.LAS",
+    "seismic":"data/full_offset-cmp_02.sgy",
+    "wavelet":"",
+    "uwi_poco":"NO 6507/8-1",
+    "nome_poco":"6507_8-1",
+    "nome_synth":"Synthetic - GUFF",
+    "nome_td":"TD - GUFF",
+    "kb": 29.0,
+    "t_water_botton":0.472
 }
