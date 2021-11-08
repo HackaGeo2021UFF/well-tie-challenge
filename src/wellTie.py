@@ -164,17 +164,25 @@ def export_data(data, ui):
         os.mkdir('outputs')
 
     with open('outputs/TD.dat','w') as file:
-        file.write('SYN1 ' + ui['uwi_poco']   + '\n')
-        file.write('SYN2 ' + ui['nome_poco']  + '\n')
-        file.write('SYN3 ' + ui['nome_synth'] + '\n')
-        file.write('SYN7 0 0 \n')
+        file.write('TDP1 ' + ui['uwi_poco']   + '\n')
+        file.write('TDP2 ' + ui['nome_poco']  + '\n')
+        file.write('TDP3 ' + ui['nome_td'] + '\n')
 
         time = data['well']['TWT'].to_numpy()
         depth = data['well'].index.to_numpy()
         n = len(data['well'])
         for i in range(n):
             file.write('SYN7 ' + str(time[i]) + ' ' + str(depth[i]) + '\n')
+  
+    with open('outputs/synth.dat','w') as file:
+        file.write('SYN1 ' + ui['uwi_poco']   + '\n')
+        file.write('SYN2 ' + ui['nome_poco']  + '\n')
+        file.write('SYN3 ' + ui['nome_synth'] + '\n')
 
-    data['seismic'].to_csv('outputs/synth.dat', index=False)
-    
+        t = data['seismic']['t'].to_numpy()
+        amp = data['seismic']['tr_synth'].to_numpy()
+        n = len(data['seismic'])
+        for i in range(n):
+            file.write('SYN7 ' + str(t[i]) + ' ' + str(amp[i]) + '\n')
+
     return None
