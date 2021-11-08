@@ -148,7 +148,7 @@ def synthetic_seismogram(data):
 
     if data['wavelet'] == None:
         cc, freq, roll = best_wavelet(data)
-        w = ricker(freq)
+        w = ricker(freq,  data)
     else:
         w = data['wavelet']
         roll = 0

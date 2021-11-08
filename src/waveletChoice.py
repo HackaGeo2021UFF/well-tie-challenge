@@ -1,8 +1,9 @@
 import numpy as np
 
-def ricker(freq_hz):
-    taxa_amostragem = 0.004
-    tempo = np.arange(-0.3, 0.3, taxa_amostragem)
+def ricker(freq_hz, data):
+    t = data['seismic']['t']
+    dt = t[1] - t[0]
+    tempo = np.arange(-0.3, 0.3, dt)
     freq_central = freq_hz * (2*np.pi)
 
     ricker = (1 - 0.5 * freq_central * freq_central * tempo * tempo) * \
@@ -64,16 +65,14 @@ def best_wavelet(data):
 
     for freq in freqs:
 
-        wavelet = ricker(freq)
+        wavelet = ricker(freq, data)
         tr_seis = data['seismic']['tr_seis'].to_numpy()
         tr_synth = np.convolve(wavelet, Rc_tdom, mode='same')
         
         for r in range(-10, 10):        #roll
 
             tr_synth_roll = np.roll(tr_synth, r)
-
             tr_seis_match = matching(tr_seis, tr_synth)
-        
             corr = np.corrcoef(tr_synth_roll, tr_seis)[0][1]
             
             if corr > corr_index:
