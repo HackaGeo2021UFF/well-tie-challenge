@@ -8,7 +8,7 @@ import xarray as xr
 from segysak.segy import segy_header_scan, segy_header_scrape, get_segy_texthead, segy_loader
 
 # function to find closest trace
-def closest_trace(well_pos, seismic_traces_pos):
+def closest_trace(well_pos, seismic_traces_pos, n_traces_to_stack):
     """
     closest_trace finds the closest trace in `seismic_traces_pos` to `well_pos`
 
@@ -27,10 +27,10 @@ def closest_trace(well_pos, seismic_traces_pos):
         Returns the index that contains the closest trace to `well_pos` in `seismic_traces_pos`
 
     """
-
     seismic_traces_pos = np.asarray(seismic_traces_pos)
     dist_2 = np.sum((seismic_traces_pos - well_pos)**2, axis=1)
-    return np.argmin(dist_2)
+    return np.argpartition(dist_2, n_traces_to_stack)[:n_traces_to_stack]
+    # return np.argmin(dist_2)
 
 def extract_seismic_trace(well_file, segy_file):
     """
@@ -45,7 +45,7 @@ def extract_seismic_trace(well_file, segy_file):
 
     Returns
     -------
-    seisnc_aropund_well.values: numpy.array
+    seisnc_around_well.values: numpy.array
         An array with the amplitude values with the `t` time coordinates
     t: numpy.array
         An array with the time coordinates    
@@ -83,16 +83,19 @@ def extract_seismic_trace(well_file, segy_file):
     well_loc = np.array([w_x, w_y])
 
     # find the closest trace
-    idx = closest_trace(well_loc, seismic_trace_loc.T)
+    # TODO remove n_traces_to_stack 
+    n_traces_to_stack = 4
+    idx = closest_trace(well_loc, seismic_trace_loc.T, n_traces_to_stack)
 
     # extract closest trace
-    seisnc_aropund_well = segy_loader(
+    seisnc_around_well = segy_loader(
         segy_file,
-        head_df=trace_headers.iloc[[idx]].copy()
+        head_df=trace_headers.iloc[idx].copy()
     )
 
     # extract time
-    t = seisnc_aropund_well.twt.values
-    amplitude = seisnc_aropund_well.data.values[0]
+    t = seisnc_around_well.twt.values
+    amplitude = seisnc_around_well.data.values.reshape(n_traces_to_stack,
+                                                       seisnc_around_well.data.shape[-1]).mean(axis=0)
 
     return amplitude, t
