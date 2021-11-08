@@ -4,19 +4,27 @@ from welly import Well
 import pandas as pd
 import lasio
 import numpy as np
+import os
 
 from src.waveletChoice import *
 from src.seismicManipulation import *
 
 def read_inputs(jpath):
+    '''
+            
+    Arguments
+        jpath: string
+    Returns
+        paths: dict
+        
+    '''
     with open(jpath) as file:
         paths = json.load(file)
     return paths
 
 def read_data(ui):
     '''
-    Description
-        
+
     Arguments
         ui: dict with string
     Returns
@@ -33,14 +41,14 @@ def read_data(ui):
     # read cube seismic
 
     # dado do desafio, usar somente no ambiente remoto
-    tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
-    t_seis = t_seis/1e3
+    #tr_seis, t_seis = seismic_trace = extract_seismic_trace(ui['well'], ui['seismic'])
+    #t_seis = t_seis/1e3
 
     # dado de exemplo, pode usar na máquina pessoal
-    #df = pd.read_csv(ui['seismic'])
-    #tr_seis, t_seis = np.array(df.cdp409), np.array(df.time)
+    df = pd.read_csv(ui['seismic'])
+    tr_seis, t_seis = df.cdp409.to_numpy() , df.time.to_numpy()
     
-    seismic = pd.DataFrame({'t':t_seis, 't_synth':np.zeros(len(tr_seis)), 'tr_seis':tr_seis})
+    seismic = pd.DataFrame({'t':t_seis, 'tr_synth':np.zeros(len(tr_seis)), 'tr_seis':tr_seis})
 
     # read wavelet
     if ui['wavelet'] == "":
@@ -53,16 +61,17 @@ def read_data(ui):
     return data
 
 def pre_processing_data(data):
-
+    
     data['well'].data['DT'] = np.nan_to_num(data['well'].data['DT'])
-    data['well'].data['RHOB-EDIT'] = np.nan_to_num(data['well'].data['RHOB-EDIT'])
+    #data['well'].data['RHOB'] = np.nan_to_num(data['well'].data['RHOB-EDIT'])
+    data['well'].data['RHOB'] = np.nan_to_num(data['well'].data['RHOB'])
 
 
     #unit convert to µs/m
     data['well'].data['DT'] = data['well'].data['DT'] / 0.3048  
     #unit convert to kg/m3  
-    data['well'].data['RHOB'] = data['well'].data['RHOB-EDIT'] * 1000
-    #data['well'].data['RHOB'] = data['well'].data['RHOB'] * 1000
+    #data['well'].data['RHOB'] = data['well'].data['RHOB-EDIT'] * 1000
+    data['well'].data['RHOB'] = data['well'].data['RHOB'] * 1000
 
     #Despiking
     #Sonic Despiking
@@ -90,20 +99,12 @@ def time_depth_relationship(data):
     log_start = data['well'].index[0]           # Depth of logging starts(m) from header
     kb = 29                                     # Kelly Bushing elevation(m) from header
     gap_int = log_start - kb
-
-    #repl_vel = (1500 + 2564)/2                  # this is from VSP data knowledge (m/s)
-    #log_start_time = 2.0 * gap_int / repl_vel        # 2 for twt
-    #print(log_start_time)
-
-    #t_seis = data['seismic']['t_seis'].to_numpy()
     v_water = 1500
     t_water_botton = 0.472
-    log_start_time = t_water_botton + 2*(log_start - v_water*t_water_botton/2)*(np.array(data['well']['DT'])[0]/1e6)
-    #print(log_start_time)
-    
-    dt = data['well']['DT']
+    log_start_time = t_water_botton + 2*(log_start - v_water*t_water_botton/2)*(np.array(data['well']['DT'])[0]/1e6) 
 
     #first replace NaN values with zero
+    dt = data['well']['DT']
     dt_iterval = dt * 0.1524 / 1e6
     t_cum =  np.cumsum(dt_iterval) * 2
     data['well']['TWT'] = t_cum + log_start_time
@@ -123,7 +124,6 @@ def ai(data):
     data['well']['AI'] = data['well']['Vsonic'] * data['well']['RHOB_DS_SM']        #(unit: kg/m2.s)
     return data
 
-
 def rc_time(data):
     AI_tdom = np.interp(x=data['seismic']['t'].to_numpy(), xp = data['well'].TWT.to_numpy(), fp = data['well'].AI.to_numpy())    #resampling
 
@@ -138,41 +138,33 @@ def rc_time(data):
     # to adjust vector size copy the last element to the tail
     Rc_tdom[-1] = Rc_tdom[-2]
     
-    data['Rc_tdom'] = Rc_tdom # pd.Series(Rc_tdom, index= data['well'].index)
-    data['AI_tdom'] = AI_tdom
+    data['well_tdom'] = data['seismic']['t'].copy()
+    data['well_tdom']['Rc_tdom'] = Rc_tdom
+    data['well_tdom']['AI_tdom'] = AI_tdom
 
     return data
 
 def synthetic_seismogram(data):
 
     if data['wavelet'] == None:
-        #wvlts = all_wavelet_and_cc(data)
-        #w = find_best_wavelet(wvlts)
-        maior_corr_final, melhor_freq, melhor_roll = best_wavelet(data)
+        cc, freq, roll = best_wavelet(data)
+        w = ricker(freq)
     else:
         w = data['wavelet']
-    
-    #data['seismic']['tr_synth'] = np.convolve(w, data['Rc_tdom'], mode='same')
-    
-    w = make_ricker(melhor_freq)
-    Rc_tdom = np.roll(data['Rc_tdom'], int(melhor_roll))
-    #print(maior_corr_final)
+        roll = 0
+        cc = 0
+        
+    Rc_tdom = np.roll(data['well_tdom']['Rc_tdom'], roll)
     data['seismic']['tr_synth'] = np.convolve(w, Rc_tdom, mode='same')
     return data
 
 def export_data(data):
-    #df = pd.DataFrame(data['well'], columns=['amplitude'])
-    #df.to_csv('outputs/well_tie.csv', index=False)
-    #export TD.dat
-    DT_pandas = data['well']['TWT'] # produto entregável
-    DT_pandas.to_csv('DT_file.dat')
-
-    #export Synth.dat
     
-    Synth_pandas = data['seismic']['tr_synth'] # produto entregável
-    Synth_pandas.to_csv('Synth_file.dat')
+    if 'outputs' not in os.listdir():
+        os.mkdir('outputs')
 
-    #output_df = pd.data({'[column_name]': column_values})  
-    #output_df.to_csv('output_file_name.dat')
+    td = data['well']['TWT']
+    td.to_csv('outputs/TD.dat')
+    data['seismic'].to_csv('outputs/synth.dat', index=False)
     
     return None
