@@ -1,0 +1,5 @@
+{
+"well":"data/example/KK1.las",
+"seismic":"data/example/around_well_seismic.csv",
+"wavelet":""
+}

@@ -16,11 +16,12 @@ import numpy as np
 if __name__ == "__main__":
 
   # lib
-  from src.well_tie import *
+  from src.wellTie import *
 
   # user inputs `ui` passed as a json file
   if len(sys.argv) == 1:
-        path = "data/inputs.json"
+        path = "data/inputs_example.json"
+        #path = "data/inputs_hackageo.json"
   else:
         path = sys.argv[1]
   ui = read_inputs(path)
