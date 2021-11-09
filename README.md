@@ -60,6 +60,10 @@ An output folder will be creat with well_name_DT.dat and well_name_synth.dat wit
 
 ## :bar_chart: Methodology to choose a wavelet (if you don't set one)
 
+The methodology for choosing the wavelet is based on the best result of the calculation of the correlation coefficient. First, a frequency range responsible for generating several Ricker wavelets is defined. Afterwards, a range of phases responsible for changing the phase of the Ricker wavelet is defined. For each frequency and phase used, the best one is chosen based on the best correlation coefficient between the synthetic trace and the seismic trace. Finally, translations are also performed in the synthetic trace in an attempt to correct temporal errors in the events. The result is a synthetic trace with the best temporal displacement involved with a Ricker that has the best frequency, phase, responsible for delivering the best correlation coefficient.
+
+The weakness of this approach is the complete dependence on the correlation coefficient. If the chosen ranges for frequency, phase and displacement are wide, there is a risk that the correlation coefficient will deliver a false lashing. Therefore, it is recommended to have prior knowledge about the wave frequency range the wavelet is in and its possible phase. The displacement range will depend on the quality of the mooring carried out up to this point (weak points are the choice of water layer velocity and rock velocity above the beginning of the well gauge). The larger the range, the greater the chance of delivering a false result, but the greater the possibility of correcting major previous tying errors. 
+
 ## :rocket: Results
 
 ![plot](notebooks/img/template_well_visualization.png)
