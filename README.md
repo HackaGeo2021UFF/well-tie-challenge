@@ -68,15 +68,21 @@ An output folder will be creat with well_name_DT.dat and well_name_synth.dat wit
 
 ## :sunglasses: Contributors
 
-Advisor:
-* Leonardo Miquelutti
-
 Students:
 * Anderson Moraes
 * Gustavo Souza
 * Hugo Araújo
 * Nathalia Campos
 * Pedro Sousa
+
+Advisor:
+* Leonardo Miquelutti
+
+## References
+
+Ryan A. Mardani. [Generating Synthetic Seismogram in Python, 2020.](https://towardsdatascience.com/generating-synthetic-seismogram-in-python-519f23f07894)
+
+Matt Hall. [How to make synthetic, 2016](https://github.com/seg/tutorials-2014/tree/master/1406_Make_a_synthetic)
 
 ## :scroll: License
 
