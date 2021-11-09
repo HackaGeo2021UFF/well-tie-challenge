@@ -48,7 +48,7 @@ def read_data(ui):
     # read well .las
     well = Well.from_las(ui['well'])
     ui['uwi'] = well.header['uwi']
-    ui['well_name'] = well.header['name'].strip().replace("/","_")
+    ui['well_name'] = well.header['name']
 
     # read cube seismic
 
@@ -281,39 +281,47 @@ def export_data(data, ui):
     if 'outputs' not in os.listdir():
         os.mkdir('outputs')
 
-    with open('outputs/'+ui['well_name']+'_DT.dat','w') as file:
-        file.write('TDP1' + ui['uwi']   + '\n')
+    result_path = ui['well_name'].strip().replace("/","_")
+
+    twt = data['well']['TWT'].to_numpy()*1000
+    twt = np.insert(twt, 0, 0)
+    depth = data['well'].index.to_numpy()
+    depth = np.insert(depth, 0, 0)
+
+    t = data['seismic']['t'].to_numpy()*1000
+    new_depth = np.interp(t,twt,depth)
+    amp = data['seismic']['tr_synth'].to_numpy()
+
+    with open('outputs/'+result_path+'_TD.dat','w') as file:
+        file.write('TDP1     '+ ui['uwi']   + '\n')
         file.write('TDP2          ' + ui['well_name']  + '\n')
         
         line = 'TDP3            ' + ui['td_name'] + ' '*70
         line = line[:73]
-        line += '0             TVDBTDD\n'
+        line += ' 0             TVDBTDD\n'
         file.write(line)
-
-        file.write('TDP5   0.000000      0.000000\n')
-
-        time = data['well']['TWT'].to_numpy()*1000
-        depth = data['well'].index.to_numpy()
-        n = len(data['well'])
+      
+        n = len(t)
         for i in range(n):
-            line = 'TDP5   %.6f      '%time[i]
+            line = 'TDP5   %.6f      '%t[i]
             line = line[:21] 
-            line += '%.6f\n'%depth[i]
+            line += '%.5f\n'%new_depth[i]
             file.write(line)
   
-    with open('outputs/'+ui['well_name']+'_synth.dat','w') as file:
+    with open('outputs/'+result_path+'_synth.dat','w') as file:
         file.write('SYN1       '+ ui['uwi']   + '\n')
         file.write('SYN2          ' + ui['well_name']  + '\n')
 
-        line = 'SYN3            ' + ui['synth_name'] + '\n'
+        line = 'SYN3                    ' + ui['synth_name'] + ' '*30
+        line = line[:70]
+        line += '4.0\n'
         file.write(line)
         
-        t = data['seismic']['t'].to_numpy()*1000
-        amp = data['seismic']['tr_synth'].to_numpy()
-        n = len(data['seismic'])
+        
+        n = len(t)
         for i in range(n):
-            line = 'SYN7   %.6f      '%t[i]
-            line = line[:21] 
+            line = 'SYN7            %.6f           '%t[i]
+            line = line[:28] 
             line += '%.6f\n'%amp[i]
             file.write(line)
 
