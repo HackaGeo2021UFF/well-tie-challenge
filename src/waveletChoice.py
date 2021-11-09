@@ -2,6 +2,24 @@ import numpy as np
 from scipy import signal
 
 def ricker(freq_hz, phase, data):
+    """
+    ricker calculates the ricker wavelet
+
+    Parameters
+    ----------
+    freq_hz : float
+        the wavelet frequency
+    phase : float
+        The wavelet phase in degrees
+    data : dict
+        A dictionary that carries all the data
+
+    Returns
+    -------
+    ricker: numpy.array
+        Returns the complex riicker wavelet amplitude
+
+    """
     t = data['seismic']['t']
     dt = t[1] - t[0]
     tempo = np.arange(-0.3, 0.3, dt)
@@ -41,6 +59,23 @@ def evaluate_results(tr_synth, tr_seis):
     return r[0][1]
 
 def matching(tr_synth, tr_seis):
+    """
+    matching zeroes all values of the seismic trace `tr_seis` 
+    outside the limits of the synthetic trace `tr_synth`
+
+    Parameters
+    ----------
+    tr_synth : numpy.array
+        The synthetic trace
+    tr_seis : numpy.array
+        The seismic trace
+
+    Returns
+    -------
+    tr_seis_new: numpy.array
+        Returns the new seismic trace (with zeros outside the area of comparison)
+
+    """
     tr_seis_new = tr_seis.copy()
     i = 0
     while tr_synth[i] == 0 and i < len(tr_seis):
@@ -53,6 +88,31 @@ def matching(tr_synth, tr_seis):
     return tr_seis_new 
 
 def best_wavelet(data):
+    """
+    best_wavelet calculates the best wavelet for the well-tie calculus based on the Pearson Correlation Coefficient R.
+    This calculus iterates over:
+    * a frequency range
+    * a phase range
+    * some wavelet types
+    * a signal-translation range
+
+    Parameters
+    ----------
+    data : dict
+        The dictionary with all the data
+        
+    Returns
+    -------
+    best_corr: float
+        The value of the correlation coefficient of the best choice
+    best_freq: float
+        The frequency of the best choice
+    best_phase: float
+        The phase of the best choice
+    best_roll: float
+        The signal rolling that yielded the best choice
+
+    """
     
     phases = np.arange(0,180,10)
     freqs = np.arange(5, 50+0.2, 0.5)
