@@ -90,4 +90,4 @@ Matt Hall. [How to make synthetic, 2016](https://github.com/seg/tutorials-2014/t
 
 ## :scroll: License
 
-Definir uma licença.
+[MIT License](https://github.com/HackaGeo2021UFF/well-tie-challenge/blob/main/LICENSE)
