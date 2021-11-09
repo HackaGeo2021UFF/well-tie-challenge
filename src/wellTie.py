@@ -37,7 +37,9 @@ def read_data(ui):
     '''
     
     # read well .las
-    well = Well.from_las(ui['well'])       
+    well = Well.from_las(ui['well'])
+    ui['uwi'] = well.header['uwi']
+    ui['well_name'] = well.header['name'].strip().replace("/","_")
 
     # read cube seismic
 
@@ -139,7 +141,8 @@ def rc_time(data):
     # to adjust vector size copy the last element to the tail
     Rc_tdom[-1] = Rc_tdom[-2]
     
-    data['well_tdom'] = data['seismic']['t'].copy()
+    data['well_tdom'] = pd.DataFrame()
+    data['well_tdom']['t'] = data['seismic']['t']
     data['well_tdom']['Rc_tdom'] = Rc_tdom
     data['well_tdom']['AI_tdom'] = AI_tdom
 
@@ -162,22 +165,16 @@ def normalization(data):
     data['seismic']['tr_seis'] = data['seismic']['tr_seis']/np.max(data['seismic']['tr_seis'])
     return data
 
-def vizualization(data):
-    plt.plot(data['seismic']['tr_synth'])
-    plt.plot(data['seismic']['tr_seis'])
-    plt.show()    
-    return None
-
 def export_data(data, ui):
     
     if 'outputs' not in os.listdir():
         os.mkdir('outputs')
 
-    with open('outputs/'+ui['nome_poco']+'_DT.dat','w') as file:
-        file.write('TDP1' + ui['uwi_poco']   + '\n')
-        file.write('TDP2          ' + ui['nome_poco']  + '\n')
+    with open('outputs/'+ui['well_name']+'_DT.dat','w') as file:
+        file.write('TDP1' + ui['uwi']   + '\n')
+        file.write('TDP2          ' + ui['well_name']  + '\n')
         
-        line = 'TDP3            ' + ui['nome_td'] + ' '*70
+        line = 'TDP3            ' + ui['td_name'] + ' '*70
         line = line[:73]
         line += '0             TVDBTDD\n'
         file.write(line)
@@ -193,11 +190,11 @@ def export_data(data, ui):
             line += '%.6f\n'%depth[i]
             file.write(line)
   
-    with open('outputs/'+ui['nome_poco']+'_synth.dat','w') as file:
-        file.write('SYN1       '+ ui['uwi_poco']   + '\n')
-        file.write('SYN2          ' + ui['nome_poco']  + '\n')
+    with open('outputs/'+ui['well_name']+'_synth.dat','w') as file:
+        file.write('SYN1       '+ ui['uwi']   + '\n')
+        file.write('SYN2          ' + ui['well_name']  + '\n')
 
-        line = 'SYN3            ' + ui['nome_synth'] + '\n'
+        line = 'SYN3            ' + ui['synth_name'] + '\n'
         file.write(line)
         
         t = data['seismic']['t'].to_numpy()*1000
