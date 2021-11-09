@@ -58,7 +58,7 @@ python main.py path
 ```
 An output folder will be creat with well_name_DT.dat and well_name_synth.dat with Decision Space Geoscience format.
 
-## :bar_chart: Methodology to choice a wavelet (if you don't set one)
+## :bar_chart: Methodology to choose a wavelet (if you don't set one)
 
 ## :rocket: Results
 
