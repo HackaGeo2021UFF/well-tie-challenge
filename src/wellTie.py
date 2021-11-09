@@ -11,30 +11,39 @@ from src.waveletChoice import *
 from src.seismicManipulation import *
 
 def read_inputs(jpath):
-    '''
-            
-    Arguments
-        jpath: string
+    """
+    read_inputs reads the input json file and stores it information in a dictionary
+
+    Parameters
+    ----------
+    jpath : string
+        the input JSON file
+
     Returns
-        paths: dict
-        
-    '''
+    -------
+    paths: dict
+        Returns a dictionary of the json file
+
+    """
     with open(jpath) as file:
         paths = json.load(file)
     return paths
 
 def read_data(ui):
-    '''
+    """
+    read_data reads the input data and stores it in a dictionary
 
-    Arguments
-        ui: dict with string
+    Parameters
+    ----------
+    ui: dict
+        A dictionary of the user inputs
+
     Returns
-        data: dict
-        Description
-            Well: welly.well.Well
-            Tops: dataframe
-            Seismic: dataframe
-    '''
+    -------
+    data: dict
+        Returns a dictionary containing all the data that will be used throughout the code
+
+    """
     
     # read well .las
     well = Well.from_las(ui['well'])
@@ -64,6 +73,22 @@ def read_data(ui):
     return data
 
 def pre_processing_data(data):
+    """
+    pre_processing_data pre-process the well DT and RHOB data with operations as:
+    * despike
+    * smooth
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary containing all the data that will be used throughout the code
+
+    Returns
+    -------
+    data: dict
+        Returns a dictionary containing all the data that will be used throughout the code
+
+    """
     
     data['well'].data['DT'] = np.nan_to_num(data['well'].data['DT'])
     data['well'].data['RHOB'] = np.nan_to_num(data['well'].data['RHOB-EDIT'])
@@ -97,6 +122,20 @@ def pre_processing_data(data):
     return data
 
 def time_depth_relationship(data, ui):
+    """
+    time_depth_relationship creates the time-depth relationship from the sonic (DT) log
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary containing all the data that will be used throughout the code
+
+    Returns
+    -------
+    ui: dict
+        Returns a dictionary of the user inputs
+
+    """
     ### just an exemple
     ### TO DO: become smart
     log_start = data['well'].index[0]           # Depth of logging starts(m) from header
@@ -114,6 +153,20 @@ def time_depth_relationship(data, ui):
     return data
 
 def ai(data):
+    """
+    ai creates the accoustic impedance log
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary containing all the data that will be used throughout the code
+
+    Returns
+    -------
+    data: dict
+        Returns a dictionary containing all the data that will be used throughout the code
+
+    """
     # Sonic velocity calculate
     Vsonic = []
     for value in data['well']['DT_DS_SM']:
@@ -128,6 +181,20 @@ def ai(data):
     return data
 
 def rc_time(data):
+    """
+    rc_time creates the Reflectivity Coefficients log in the time-domain
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary containing all the data that will be used throughout the code
+
+    Returns
+    -------
+    data: dict
+        Returns a dictionary containing all the data that will be used throughout the code
+
+    """
     AI_tdom = np.interp(x=data['seismic']['t'].to_numpy(), xp = data['well'].TWT.to_numpy(), fp = data['well'].AI.to_numpy())    #resampling
 
     # again Rc calulation but in reampled time domain
@@ -149,6 +216,20 @@ def rc_time(data):
     return data
 
 def synthetic_seismogram(data):
+    """
+    synthetic_seismogram creates the synthetic seismogram
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary containing all the data that will be used throughout the code
+
+    Returns
+    -------
+    data: dict
+        Returns a dictionary containing all the data that will be used throughout the code
+
+    """
 
     if data['wavelet'] == None:
         cc, freq, roll, phase = best_wavelet(data)
@@ -161,11 +242,41 @@ def synthetic_seismogram(data):
     return data
 
 def normalization(data):
+    """
+    normalization normalizes the synthetic and seismic signals
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary containing all the data that will be used throughout the code
+
+    Returns
+    -------
+    data: dict
+        Returns a dictionary containing all the data that will be used throughout the code
+
+    """
     data['seismic']['tr_synth'] = data['seismic']['tr_synth']/np.max(data['seismic']['tr_synth'])
     data['seismic']['tr_seis'] = data['seismic']['tr_seis']/np.max(data['seismic']['tr_seis'])
     return data
 
 def export_data(data, ui):
+    """
+    export_data exports data in the Decision Workspace format
+
+    Parameters
+    ----------
+    data: dict
+        A dictionary containing all the data that will be used throughout the code
+    ui: dict
+        A dictionary of the user inputs 
+
+    Returns
+    -------
+    data: dict
+        Returns a dictionary containing all the data that will be used throughout the code
+
+    """
     
     if 'outputs' not in os.listdir():
         os.mkdir('outputs')
