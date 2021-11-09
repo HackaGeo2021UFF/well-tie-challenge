@@ -168,17 +168,21 @@ def vizualization(data):
     plt.show()    
     return None
 
-
 def export_data(data, ui):
     
     if 'outputs' not in os.listdir():
         os.mkdir('outputs')
 
     with open('outputs/'+ui['nome_poco']+'_DT.dat','w') as file:
-        file.write('TDP1   ' + ui['uwi_poco']   + '\n')
-        file.write('TDP2   ' + ui['nome_poco']  + '\n')
-        file.write('TDP3   ' + ui['nome_td'] + '\n')
-        file.write('TDP5   0.000000   0.000000\n')
+        file.write('TDP1' + ui['uwi_poco']   + '\n')
+        file.write('TDP2          ' + ui['nome_poco']  + '\n')
+        
+        line = 'TDP3            ' + ui['nome_td'] + ' '*70
+        line = line[:73]
+        line += '0             TVDBTDD\n'
+        file.write(line)
+
+        file.write('TDP5   0.000000      0.000000\n')
 
         time = data['well']['TWT'].to_numpy()*1000
         depth = data['well'].index.to_numpy()
@@ -190,10 +194,12 @@ def export_data(data, ui):
             file.write(line)
   
     with open('outputs/'+ui['nome_poco']+'_synth.dat','w') as file:
-        file.write('SYN1   ' + ui['uwi_poco']   + '\n')
-        file.write('SYN2   ' + ui['nome_poco']  + '\n')
-        file.write('SYN3   ' + ui['nome_synth'] + '\n')
+        file.write('SYN1       '+ ui['uwi_poco']   + '\n')
+        file.write('SYN2          ' + ui['nome_poco']  + '\n')
 
+        line = 'SYN3            ' + ui['nome_synth'] + '\n'
+        file.write(line)
+        
         t = data['seismic']['t'].to_numpy()*1000
         amp = data['seismic']['tr_synth'].to_numpy()
         n = len(data['seismic'])
