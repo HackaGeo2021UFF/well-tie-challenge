@@ -208,6 +208,16 @@ def rc_time(data):
     # to adjust vector size copy the last element to the tail
     Rc_tdom[-1] = Rc_tdom[-2]
     
+    i = 0
+    while Rc_tdom[i] == 0 and i < len(Rc_tdom):
+        i += 1
+    Rc_tdom[i] = Rc_tdom[i+1]
+
+    i = len(Rc_tdom)-1
+    while Rc_tdom[i] == 0 and i > 0:
+        i -= 1
+    Rc_tdom[i] = Rc_tdom[i-1]
+    
     data['well_tdom'] = pd.DataFrame()
     data['well_tdom']['t'] = data['seismic']['t']
     data['well_tdom']['Rc_tdom'] = Rc_tdom
