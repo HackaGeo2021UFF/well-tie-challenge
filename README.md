@@ -70,6 +70,8 @@ The weakness of this approach is the complete dependence on the correlation coef
 
 ![plot](notebooks/img/results_tdom.png)
 
+![plot](outputs/dsg.png)
+
 ## :sunglasses: Contributors
 
 Students:
@@ -82,7 +84,7 @@ Students:
 Advisor:
 * Leonardo Miquelutti
 
-## References
+## :+1: References
 
 Ryan A. Mardani. [Generating Synthetic Seismogram in Python, 2020.](https://towardsdatascience.com/generating-synthetic-seismogram-in-python-519f23f07894)
 
