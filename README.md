@@ -24,7 +24,7 @@ The image below was taken from the book *An Introduction to Geophysical Explorat
 * The geological section;
 * The acoustic impedance profile;
 * The reflection coefficient profile;
-* And after being convolved with the source wavelet, we obtain the signal the well location (shown in the upper part as a synthetic seismogram);
+* And after being convolved with the source wavelet, we obtain the signal in the well location (shown in the upper part as a synthetic seismogram);
 
 ![plot](notebooks/img/welltie.png)
 
