@@ -10,7 +10,7 @@ from segysak.segy import segy_header_scan, segy_header_scrape, get_segy_texthead
 # function to find closest trace
 def closest_trace(well_pos, seismic_traces_pos, n_traces_to_stack):
     """
-    closest_trace finds the closest trace in `seismic_traces_pos` to `well_pos`
+    closest_trace finds the closest `n_traces_to_stack` traces in `seismic_traces_pos` to `well_pos`
 
     Parameters
     ----------
@@ -61,16 +61,13 @@ def extract_seismic_trace(well_file, segy_file):
 
     # lasio lib will help with header
     w_las = lasio.read(w_path) 
-    w_las.header
 
     # well location (projected coordinates)
     w_x = w_las.header['Well']['XCOORD']['value']
     w_y = w_las.header['Well']['YCOORD']['value']
-    # print(w_x, w_y)
 
     # check if segy file exists
-    # segy_file = pathlib.Path("full_offset-cmp_02.sgy") # colab online
-    # print("SEG-Y exists:", segy_file.exists())
+    # segy_file = pathlib.Path("full_offset-cmp_02.sgy") 
 
     # read all trace headers
     trace_headers = segy_header_scrape(segy_file)
@@ -82,12 +79,12 @@ def extract_seismic_trace(well_file, segy_file):
     # the well location
     well_loc = np.array([w_x, w_y])
 
-    # find the closest trace
+    # find the closest traces
     # TODO remove n_traces_to_stack 
     n_traces_to_stack = 4
     idx = closest_trace(well_loc, seismic_trace_loc.T, n_traces_to_stack)
 
-    # extract closest trace
+    # extract closest traces
     seisnc_around_well = segy_loader(
         segy_file,
         head_df=trace_headers.iloc[idx].copy()
@@ -95,6 +92,8 @@ def extract_seismic_trace(well_file, segy_file):
 
     # extract time
     t = seisnc_around_well.twt.values
+    
+    # stack the seismic traces
     amplitude = seisnc_around_well.data.values.reshape(n_traces_to_stack,
                                                        seisnc_around_well.data.shape[-1]).mean(axis=0)
 
