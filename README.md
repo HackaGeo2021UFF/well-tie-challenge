@@ -66,9 +66,9 @@ The weakness of this approach is the complete dependence on the correlation coef
 
 ## :rocket: Results
 
-![plot](notebooks/img/template_well_visualization.png)
+![plot](notebooks/img/results_ddom.png)
 
-![plot](notebooks/img/template_synth_visualization.png)
+![plot](notebooks/img/results_tdom.png)
 
 ## :sunglasses: Contributors
 
