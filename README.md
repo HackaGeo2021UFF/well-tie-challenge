@@ -10,10 +10,12 @@ The challenge is to automate a well tie process.
 
 The principal objectives proposed in the **well-tie automation process** are:
 * Learn how to read .las and .segy files in python;
+* Extract the trace seismic in the same place of the well
 * Aplication of different equations related to well tie;
-* Convert time-based data to depth-base;
+* Establish the time-to-depth relationship with scarce points;
 * Create different kind of wavelets to adjust with our well log;
-* We don't know the P-wave speed of both the sea and the upper part of the well where there is no `DT` recording
+* For the data set that this work was developed the the P-wave speed of both the sea and the upper part of the well where there is no `DT` recording were not available, we had to calculate an average velocity for the region superior to the well measurements;
+* Develop a objective code that contemplates the proposal of an automated well-tie process with only essential inputs, sweeping different frequencies in a Richer Wavelet.
 
 ## :page_with_curl: Well-tie theory
 
