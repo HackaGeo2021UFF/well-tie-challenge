@@ -74,6 +74,18 @@ The weakness of this approach is the complete dependence on the correlation coef
 
 ![plot](outputs/dsg.png)
 
+## To contribute
+
+Future implementations can be:
+
+* more wavelet choices and input parameters (as ranges, characteristics etc)
+* allow for other inputs, as the P-wave velocities from the gaps
+* use of AI to correlate peaks from different signals - exclude the translation part
+* improvements on the extraction of headers parameters (as kb, datum etc)
+* improvements on the extraction of the seismic signal (cutoff by distance, for example)
+* take in consideration the direction of the well
+* a user-interface
+
 ## :sunglasses: Contributors
 
 Students:
